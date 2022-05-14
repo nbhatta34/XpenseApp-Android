@@ -40,11 +40,8 @@ dev_dependencies:
     sdk: flutter
   google_fonts: ^2.3.1
   fluttertoast: ^8.0.9
-<<<<<<< HEAD
-=======
   image_picker: ^0.8.4+10
 
->>>>>>> login
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -68,6 +65,9 @@ flutter:
   assets:
     - assets/images/
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> forgot-password
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 =======

@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
-import 'package:xpense_android/Screens/RegisterScreen.dart';
-
-
-=======
 import 'package:xpense_android/Screens/LoginScreen.dart';
 
->>>>>>> login
+
 void main() async {
   runApp(const MyApp());
 }
@@ -23,11 +18,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-<<<<<<< HEAD
-      home: RegisterScreen(),
-=======
+
       home: LoginScreen(),
->>>>>>> login
     );
   }
 }

@@ -44,6 +44,7 @@ packages:
     source: hosted
     version: "1.16.0"
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
   cross_file:
     dependency: transitive
@@ -53,6 +54,8 @@ packages:
     source: hosted
     version: "0.3.3+1"
 >>>>>>> login
+=======
+>>>>>>> forgot-password
   crypto:
     dependency: transitive
     description:
@@ -146,6 +149,7 @@ packages:
     source: hosted
     version: "4.0.1"
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
   image_picker:
     dependency: "direct dev"
@@ -183,6 +187,8 @@ packages:
     source: hosted
     version: "2.5.0"
 >>>>>>> login
+=======
+>>>>>>> forgot-password
   js:
     dependency: transitive
     description:
