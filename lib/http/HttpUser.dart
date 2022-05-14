@@ -6,8 +6,6 @@ import 'package:http/http.dart' as http;
 import 'package:xpense_android/model/UserModel.dart';
 import 'package:xpense_android/response/ResponseUser.dart';
 
-
-
 class HttpConnectUser {
   Future<http.Response> get(String endpoint) async {
     var url = Uri.parse(endpoint);
@@ -18,7 +16,6 @@ class HttpConnectUser {
 // +++++++++++++++++++++++++++++++++     Register  User  Function     ++++++++++++++++++++++++++++
   String baseurl = 'http://10.0.2.2:3000/';
   static String token = '';
-
 
   //sending data to the server--- creating user
   Future<bool> registerPost(User user) async {
@@ -69,8 +66,5 @@ class HttpConnectUser {
       print(e);
     }
     return false;
-
   }
 }
-
-

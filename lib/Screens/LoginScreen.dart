@@ -6,7 +6,6 @@ import 'package:xpense_android/http/HttpUser.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
-
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -14,7 +13,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-
   @override
   void initState() {
     super.initState();
@@ -62,7 +60,6 @@ class _LoginScreenState extends State<LoginScreen> {
           if (value!.isEmpty) {
             Fluttertoast.showToast(msg: "Please enter your email.");
           }
-
           // Reg Exp for email validation
           if (!RegExp("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+.[a-z]")
               .hasMatch(value)) {
@@ -97,7 +94,6 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
-
     final passwordField = Material(
       shadowColor: Color.fromARGB(255, 190, 190, 190),
       elevation: 5,
@@ -150,7 +146,6 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
-
     final loginButton = SizedBox(
       width: double.infinity, // <-- match_parent
       height: 50, // <-- match-parent
@@ -187,7 +182,6 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
-
     final googleButton = SizedBox(
       width: double.infinity, // <-- match_parent
       height: 50, // <-- match-parent
@@ -216,7 +210,6 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
-
     return SafeArea(
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -282,14 +275,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Align(
                       alignment: Alignment.bottomRight,
                       child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ForgotPassword(),
-                            ),
-                          );
-                        },
+                        onTap: () {},
                         child: Text(
                           "Forgot Password?",
                           style: GoogleFonts.poppins(
@@ -298,6 +284,22 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    "OR",
+                    style: GoogleFonts.poppins(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Color.fromARGB(255, 122, 122, 122),
+                    ),
+                  ),
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(left: 28.0, right: 28, top: 8),
+                    child: googleButton,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
