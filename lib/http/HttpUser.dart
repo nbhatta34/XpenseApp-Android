@@ -4,9 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart';
 import 'package:http/http.dart' as http;
+<<<<<<< HEAD
 import 'package:xpense_android/model/UserModel.dart';
 import 'package:xpense_android/response/ResponseUser.dart';
 
+=======
+>>>>>>> login
 
 class HttpConnectUser {
   Future<http.Response> get(String endpoint) async {
@@ -19,6 +22,7 @@ class HttpConnectUser {
   String baseurl = 'http://10.0.2.2:3000/';
   static String token = '';
 
+<<<<<<< HEAD
   //sending data to the server--- creating user
   Future<bool> registerPost(User user) async {
     Map<String, dynamic> userMap = {
@@ -38,5 +42,34 @@ class HttpConnectUser {
     } else {
       return false;
     }
+=======
+  Future<bool> loginPosts(String email, String password) async {
+    // print("Data Reached Login");
+    // print(email + password);
+    Map<String, dynamic> loginUser = {'email': email, 'password': password};
+
+    try {
+      // print("login server");
+      final response = await post(
+          Uri.parse(
+            baseurl + "auth/login",
+          ),
+          body: loginUser);
+
+      // print(response.body);
+
+      //json serializing inline
+      final jsonData = jsonDecode(response.body) as Map;
+
+      token = jsonData['token'];
+
+      if (jsonData['success']) {
+        return true;
+      }
+    } catch (e) {
+      print(e);
+    }
+    return false;
+>>>>>>> login
   }
 }
