@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
-<<<<<<< HEAD
-=======
 import 'package:xpense_android/Screens/ForgotPassword.dart';
->>>>>>> forgot-password
 import 'package:xpense_android/http/HttpUser.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -280,8 +277,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(
                     height: 10,
                   ),
-<<<<<<< HEAD
-=======
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 35.0),
                     child: Align(
@@ -304,7 +299,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
->>>>>>> forgot-password
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -353,8 +347,4 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     });
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> forgot-password

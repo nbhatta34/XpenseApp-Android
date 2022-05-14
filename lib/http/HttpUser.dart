@@ -32,7 +32,7 @@ class HttpConnectUser {
     // print("User Map: ${userMap}");
 
     final response =
-        await post(Uri.parse(baseurl + 'auth/register/'), body: userMap);
+        await http.post(Uri.parse(baseurl + 'auth/register/'), body: userMap);
     if (response.statusCode == 200) {
       var usrRes = ResponseUser.fromJson(jsonDecode(response.body));
       return usrRes.success!;
@@ -49,7 +49,7 @@ class HttpConnectUser {
 
     try {
       // print("login server");
-      final response = await post(
+      final response = await http.post(
           Uri.parse(
             baseurl + "auth/login",
           ),
@@ -72,5 +72,5 @@ class HttpConnectUser {
 
   }
 }
-  }
+
 
