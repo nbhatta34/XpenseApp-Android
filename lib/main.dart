@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:xpense_android/Screens/LoginScreen.dart';
+import 'package:xpense_android/Screens/HomeScreen.dart';
+import 'package:xpense_android/Screens/RegisterScreen.dart';
+
 
 void main() async {
   runApp(const MyApp());
