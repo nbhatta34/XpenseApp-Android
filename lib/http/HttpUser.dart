@@ -129,4 +129,35 @@ class HttpConnectUser {
       );
     } else {}
   }
+
+  // +++++++++++++++++++++++++++++++ Update Transaction Details +++++++++++++++++++++++++++++++++++++++++++++
+
+  void updateTransaction(
+      Transaction updateTransaction, String transactionId) async {
+    // print(transactionId);
+    // print(updateTransaction.clientName);
+    String tok = 'Bearer $token';
+    // print("Profile Data Reached Update Transaction HTTP Function");
+
+    Map<String, dynamic> transMap = {
+      "itemName": updateTransaction.itemName,
+      "quantity": updateTransaction.quantity,
+      "unitPrice": updateTransaction.unitPrice,
+      "category": updateTransaction.category,
+      "clientName": updateTransaction.clientName,
+    };
+
+    final response = await http.put(
+        Uri.parse(baseurl + 'auth/updateTransaction/${transactionId}'),
+        headers: {'Authorization': tok},
+        body: transMap);
+    if (response.statusCode == 200) {
+      Fluttertoast.showToast(
+        msg: "Transaction Updated",
+        backgroundColor: Colors.green,
+        fontSize: 16,
+        gravity: ToastGravity.TOP,
+      );
+    } else {}
+  }
 }

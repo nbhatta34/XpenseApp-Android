@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:xpense_android/Screens/AddEarning.dart';
+import 'package:xpense_android/Screens/EditTransaction.dart';
 import 'package:xpense_android/Screens/HomeScreen.dart';
 import 'package:xpense_android/http/HttpUser.dart';
 import 'package:xpense_android/response/GetTransactionResponse.dart';
@@ -363,6 +364,16 @@ class _DashBoardState extends State<DashBoard>
                           children: [
                             InkWell(
                               onTap: () {},
+                              onLongPress: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => EditTransaction(
+                                          index: transactionData.length -
+                                              (index + 1),
+                                          transactions: transactionData),
+                                    ));
+                              },
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 8.0, horizontal: 10),
