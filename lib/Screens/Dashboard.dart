@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:xpense_android/Screens/AddEarning.dart';
 
 class DashBoard extends StatefulWidget {
   const DashBoard({Key? key}) : super(key: key);
@@ -17,6 +18,19 @@ class _DashBoardState extends State<DashBoard>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+       floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddEarning(),
+            ),
+          );
+        },
+        child: Icon(
+          Icons.addchart_rounded,
+        ),
+      ),
       body: getBody(),
     );
   }

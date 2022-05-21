@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:xpense_android/model/TransactionModel.dart';
 import 'package:xpense_android/model/UserModel.dart';
 import 'package:xpense_android/response/ResponseUser.dart';
 
@@ -66,5 +67,32 @@ class HttpConnectUser {
       print(e);
     }
     return false;
+  }
+
+// ++++++++++++++++++++++++++++++++ Add Transaction  ++++++++++++++++++++++++++++++++++++++++
+
+  Future<bool> addTransaction(Transaction trans) async {
+    String tok = 'Bearer $token';
+    Map<String, dynamic> transactionMap = {
+      "itemName": trans.itemName,
+      "quantity": trans.quantity,
+      "unitPrice": trans.unitPrice,
+      "category": trans.category,
+      "clientName": trans.clientName,
+    };
+
+    // print("Transaction Map: ${transactionMap}");
+
+    final response = await http.post(Uri.parse(baseurl + 'auth/addTransaction/'),
+        body: transactionMap,
+        headers: {
+          'Authorization': tok,
+        });
+    if (response.statusCode == 200) {
+      var usrRes = ResponseUser.fromJson(jsonDecode(response.body));
+      return usrRes.success!;
+    } else {
+      return false;
+    }
   }
 }
