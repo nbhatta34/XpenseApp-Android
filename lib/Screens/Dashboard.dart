@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:xpense_android/Screens/AddEarning.dart';
+import 'package:xpense_android/http/HttpUser.dart';
+import 'package:xpense_android/response/GetTransactionResponse.dart';
+import 'package:jiffy/jiffy.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class DashBoard extends StatefulWidget {
   const DashBoard({Key? key}) : super(key: key);
@@ -11,14 +15,46 @@ class DashBoard extends StatefulWidget {
 
 class _DashBoardState extends State<DashBoard>
     with SingleTickerProviderStateMixin {
+  HttpConnectUser transaction = HttpConnectUser();
+  TransactionResponse responseCatcher = TransactionResponse();
   int activeDay = 3;
 
   bool isOpened = false;
+  @override
+  void initState() {
+    super.initState();
+    fetchdata();
+  }
+
+  fetchdata() async {
+    try {
+      var response = await transaction.viewTransactions("auth/addTransaction/");
+
+      List<TransactionOrigin> transactions = [];
+
+      for (var u in response["data"]) {
+        TransactionOrigin trans = TransactionOrigin(
+            u["itemName"],
+            u["quantity"],
+            u["unitPrice"],
+            u["category"],
+            u["clientName"],
+            u["createdAt"],
+            u["_id"]);
+
+        transactions.add(trans);
+      }
+
+      return transactions;
+    } catch (err) {
+      print(err);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
             context,
@@ -285,7 +321,209 @@ class _DashBoardState extends State<DashBoard>
             ],
           ),
         ),
+        Expanded(
+          child: FutureBuilder(
+            future: fetchdata(),
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
+              if (snapshot.data == null) {
+                return SpinKitWave(
+                  color: Colors.black54,
+                );
+              } else {
+                if (snapshot.data?.length == 0) {
+                  return Container(
+                    child: Center(
+                      child: Text(
+                        "No Transactions To Show",
+                        style: GoogleFonts.poppins(
+                            fontSize: 23,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black54),
+                      ),
+                    ),
+                  );
+                } else {
+                  final List<Transactions> transactionData = List.generate(
+                    snapshot.data.length,
+                    (index) => Transactions(
+                      '${snapshot.data?[index].itemName}',
+                      '${snapshot.data?[index].quantity}',
+                      '${snapshot.data?[index].unitPrice}',
+                      '${snapshot.data?[index].category}',
+                      '${snapshot.data?[index].clientName}',
+                      '${snapshot.data?[index].transactionId}',
+                    ),
+                  );
+                  return ListView.builder(
+                    itemCount: transactionData.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        child: Row(
+                          children: [
+                            InkWell(
+                              onTap: () {},
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 8.0, horizontal: 10),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Container(
+                                          width: (MediaQuery.of(context)
+                                                      .size
+                                                      .width -
+                                                  60) *
+                                              0.65,
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                width: 50,
+                                                height: 50,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: Colors.grey
+                                                      .withOpacity(0.1),
+                                                ),
+                                                child: Center(
+                                                  child: Image.asset(
+                                                    "assets/images/${snapshot.data?[snapshot.data.length - (index + 1)].category.toLowerCase()}.png",
+                                                    width: 50,
+                                                    height: 50,
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(width: 15),
+                                              Container(
+                                                width: (MediaQuery.of(context)
+                                                            .size
+                                                            .width -
+                                                        110) *
+                                                    0.5,
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      "${snapshot.data?[snapshot.data.length - (index + 1)].itemName} x ${snapshot.data?[snapshot.data.length - (index + 1)].quantity}",
+                                                      style: TextStyle(
+                                                          fontSize: 15,
+                                                          color: Colors.black,
+                                                          fontWeight:
+                                                              FontWeight.w500),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                    SizedBox(height: 5),
+                                                    Text(
+                                                      "Rs. ${snapshot.data?[snapshot.data.length - (index + 1)].unitPrice}",
+                                                      style: TextStyle(
+                                                          fontSize: 12,
+                                                          color: Colors.black
+                                                              .withOpacity(0.5),
+                                                          fontWeight:
+                                                              FontWeight.w400),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                    SizedBox(height: 5),
+                                                    Text(
+                                                      "${snapshot.data?[snapshot.data.length - (index + 1)].clientName}",
+                                                      style: TextStyle(
+                                                          fontSize: 12,
+                                                          color: Colors.black
+                                                              .withOpacity(0.5),
+                                                          fontWeight:
+                                                              FontWeight.w400),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                    SizedBox(height: 5),
+                                                    Text(
+                                                      "${Jiffy(snapshot.data?[snapshot.data.length - (index + 1)].createdAt).yMMMMEEEEd}",
+                                                      style: TextStyle(
+                                                          fontSize: 12,
+                                                          color: Colors.black
+                                                              .withOpacity(0.5),
+                                                          fontWeight:
+                                                              FontWeight.w400),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                        Container(
+                                          width: (MediaQuery.of(context)
+                                                      .size
+                                                      .width -
+                                                  0) /
+                                              2.82,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              Text(
+                                                "Rs. ${double.parse(snapshot.data?[snapshot.data.length - (index + 1)].quantity) * double.parse(snapshot.data?[snapshot.data.length - (index + 1)].unitPrice)}",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 15,
+                                                  color: Color.fromARGB(
+                                                      255, 33, 139, 36),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                }
+              }
+            },
+          ),
+        )
       ],
     );
   }
+}
+
+class TransactionOrigin {
+  final String itemName;
+  final String quantity;
+  final String unitPrice;
+  final String category;
+  final String clientName;
+  final String createdAt;
+  final String transactionId;
+
+  TransactionOrigin(this.itemName, this.quantity, this.unitPrice, this.category,
+      this.clientName, this.createdAt, this.transactionId);
+}
+
+class Transactions {
+  final String itemName,
+      quantity,
+      unitPrice,
+      category,
+      clientName,
+      transactionId;
+
+  Transactions(this.itemName, this.quantity, this.unitPrice, this.category,
+      this.clientName, this.transactionId);
 }

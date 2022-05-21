@@ -83,7 +83,8 @@ class HttpConnectUser {
 
     // print("Transaction Map: ${transactionMap}");
 
-    final response = await http.post(Uri.parse(baseurl + 'auth/addTransaction/'),
+    final response = await http.post(
+        Uri.parse(baseurl + 'auth/addTransaction/'),
         body: transactionMap,
         headers: {
           'Authorization': tok,
@@ -93,6 +94,20 @@ class HttpConnectUser {
       return usrRes.success!;
     } else {
       return false;
+    }
+  }
+
+// ++++++++++++++++++++++++++++++++ Get All Transaction Data ++++++++++++++++++++++++++++++++++++++++
+
+  Future viewTransactions(String url) async {
+    String tok = 'Bearer $token';
+    var response = await http.get(Uri.parse(baseurl + url), headers: {
+      'Authorization': tok,
+    });
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed To Load Transactions');
     }
   }
 }
