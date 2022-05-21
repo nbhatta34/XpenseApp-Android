@@ -110,4 +110,23 @@ class HttpConnectUser {
       throw Exception('Failed To Load Transactions');
     }
   }
+
+// +++++++++++++++++++++++++++++++ Delete Transaction Details +++++++++++++++++++++++++++++++++++++++++++++
+
+  void deleteTransaction(String transactionId) async {
+    String tok = 'Bearer $token';
+    // print("Profile Data Reached Delete Transaction HTTP Function");
+
+    final response = await http.delete(
+        Uri.parse(baseurl + 'auth/updateTransaction/${transactionId}'),
+        headers: {'Authorization': tok});
+    if (response.statusCode == 200) {
+      Fluttertoast.showToast(
+        msg: "Transaction Deleted",
+        backgroundColor: Colors.green,
+        fontSize: 16,
+        gravity: ToastGravity.TOP,
+      );
+    } else {}
+  }
 }

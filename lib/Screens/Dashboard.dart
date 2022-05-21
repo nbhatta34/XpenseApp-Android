@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:xpense_android/Screens/AddEarning.dart';
+import 'package:xpense_android/Screens/HomeScreen.dart';
 import 'package:xpense_android/http/HttpUser.dart';
 import 'package:xpense_android/response/GetTransactionResponse.dart';
 import 'package:jiffy/jiffy.dart';
@@ -429,6 +430,59 @@ class _DashBoardState extends State<DashBoard>
                                                               FontWeight.w400),
                                                       overflow:
                                                           TextOverflow.ellipsis,
+                                                    ),
+                                                    IconButton(
+                                                      onPressed: () {
+                                                        showDialog<String>(
+                                                          context: context,
+                                                          builder: (BuildContext
+                                                                  context) =>
+                                                              AlertDialog(
+                                                            title: const Text(
+                                                                'Are you sure you want to delete?'),
+                                                            content: const Text(
+                                                                'Transaction will be deleted permanently.'),
+                                                            actions: <Widget>[
+                                                              TextButton(
+                                                                onPressed: () =>
+                                                                    Navigator.pop(
+                                                                        context,
+                                                                        'Cancel'),
+                                                                child: const Text(
+                                                                    'Cancel'),
+                                                              ),
+                                                              TextButton(
+                                                                onPressed: () {
+                                                                  HttpConnectUser().deleteTransaction(snapshot
+                                                                      .data?[snapshot
+                                                                              .data
+                                                                              .length -
+                                                                          (index +
+                                                                              1)]
+                                                                      .transactionId);
+                                                                  Navigator.push(
+                                                                      context,
+                                                                      MaterialPageRoute(
+                                                                        builder:
+                                                                            (context) =>
+                                                                                HomeScreen(),
+                                                                      ));
+                                                                  // Navigator.pop(
+                                                                  //     context, 'OK');
+                                                                  // child:
+                                                                },
+                                                                child:
+                                                                    const Text(
+                                                                        'OK'),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        );
+                                                      },
+                                                      icon: Icon(
+                                                        Icons.delete_outline,
+                                                        color: Colors.red,
+                                                      ),
                                                     ),
                                                     SizedBox(height: 5),
                                                     Text(
