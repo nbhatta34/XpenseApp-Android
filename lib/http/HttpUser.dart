@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:xpense_android/model/StockModel.dart';
 import 'package:xpense_android/model/TransactionModel.dart';
 import 'package:xpense_android/model/UserModel.dart';
 import 'package:xpense_android/response/ResponseUser.dart';
@@ -160,4 +161,29 @@ class HttpConnectUser {
       );
     } else {}
   }
+
+// +++++++++++++++++++++++++++++++ Adding Stock Details +++++++++++++++++++++++++++++++++++++++++++++
+  Future<bool> addStock(Stock stoc) async {
+    String tok = 'Bearer $token';
+    Map<String, dynamic> stockMap = {
+      "stockName": stoc.stockName,
+      "quantity": stoc.quantity,
+      "unitPrice": stoc.unitPrice,
+      "category": stoc.category,
+      "supplierName": stoc.supplierName,
+    };
+    // print("Transaction Map: ${transactionMap}");
+    final response = await http.post(Uri.parse(baseurl + 'auth/addStock'),
+        body: stockMap,
+        headers: {
+          'Authorization': tok,
+        });
+    if (response.statusCode == 200) {
+      var usrRes = ResponseUser.fromJson(jsonDecode(response.body));
+      return usrRes.success!;
+    } else {
+      return false;
+    }
+  }
+
 }
