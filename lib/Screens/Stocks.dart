@@ -201,6 +201,61 @@ class _StocksState extends State<Stocks> {
                                                       overflow:
                                                           TextOverflow.ellipsis,
                                                     ),
+                                                    IconButton(
+                                                      onPressed: () {
+                                                        showDialog<String>(
+                                                          context: context,
+                                                          builder: (BuildContext
+                                                                  context) =>
+                                                              AlertDialog(
+                                                            title: const Text(
+                                                                'Are you sure you want to delete?'),
+                                                            content: const Text(
+                                                                'Stock will be deleted permanently.'),
+                                                            actions: <Widget>[
+                                                              TextButton(
+                                                                onPressed: () =>
+                                                                    Navigator.pop(
+                                                                        context,
+                                                                        'Cancel'),
+                                                                child: const Text(
+                                                                    'Cancel'),
+                                                              ),
+                                                              TextButton(
+                                                                onPressed: () {
+                                                                  HttpConnectUser().deleteStock(snapshot
+                                                                      .data?[snapshot
+                                                                              .data
+                                                                              .length -
+                                                                          (index +
+                                                                              1)]
+                                                                      .stockId);
+                                                                  Navigator
+                                                                      .push(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                      builder:
+                                                                          (context) =>
+                                                                              HomeScreen(),
+                                                                    ),
+                                                                  );
+                                                                  // Navigator.pop(
+                                                                  //     context, 'OK');
+                                                                  // child:
+                                                                },
+                                                                child:
+                                                                    const Text(
+                                                                        'OK'),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        );
+                                                      },
+                                                      icon: Icon(
+                                                        Icons.delete_outline,
+                                                        color: Colors.red,
+                                                      ),
+                                                    ),
                                                     SizedBox(height: 5),
                                                     Text(
                                                       "${snapshot.data?[snapshot.data.length - (index + 1)].supplierName}",

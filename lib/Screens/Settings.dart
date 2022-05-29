@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:xpense_android/Screens/LoginScreen.dart';
 
 class Settings extends StatefulWidget {
   const Settings({Key? key}) : super(key: key);
@@ -25,7 +25,11 @@ class _SettingsState extends State<Settings> {
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () {
-                      
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LoginScreen(),
+                          ));
                     },
                     child: Text(
                       "Logout",

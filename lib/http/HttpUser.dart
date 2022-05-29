@@ -198,4 +198,22 @@ class HttpConnectUser {
       throw Exception('Failed To Load Stocks');
     }
   }
+  // +++++++++++++++++++++++++++++++ Delete Transaction Details +++++++++++++++++++++++++++++++++++++++++++++
+
+  void deleteStock(String stockId) async {
+    String tok = 'Bearer $token';
+    // print("Profile Data Reached Delete Transaction HTTP Function");
+
+    final response = await http.delete(
+        Uri.parse(baseurl + 'auth/updateStock/${stockId}'),
+        headers: {'Authorization': tok});
+    if (response.statusCode == 200) {
+      Fluttertoast.showToast(
+        msg: "Stock Deleted",
+        backgroundColor: Colors.green,
+        fontSize: 16,
+        gravity: ToastGravity.TOP,
+      );
+    } else {}
+  }
 }
