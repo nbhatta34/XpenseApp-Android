@@ -173,11 +173,10 @@ class HttpConnectUser {
       "supplierName": stoc.supplierName,
     };
     // print("Transaction Map: ${transactionMap}");
-    final response = await http.post(Uri.parse(baseurl + 'auth/addStock'),
-        body: stockMap,
-        headers: {
-          'Authorization': tok,
-        });
+    final response = await http
+        .post(Uri.parse(baseurl + 'auth/addStock'), body: stockMap, headers: {
+      'Authorization': tok,
+    });
     if (response.statusCode == 200) {
       var usrRes = ResponseUser.fromJson(jsonDecode(response.body));
       return usrRes.success!;
@@ -186,4 +185,17 @@ class HttpConnectUser {
     }
   }
 
+  // ++++++++++++++++++++++++++++++++ Get All Stock Data ++++++++++++++++++++++++++++++++++++++++
+
+  Future viewStocks(String url) async {
+    String tok = 'Bearer $token';
+    var response = await http.get(Uri.parse(baseurl + url), headers: {
+      'Authorization': tok,
+    });
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed To Load Stocks');
+    }
+  }
 }
