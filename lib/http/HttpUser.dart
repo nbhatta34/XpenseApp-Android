@@ -216,4 +216,33 @@ class HttpConnectUser {
       );
     } else {}
   }
+  // +++++++++++++++++++++++++++++++ Update Stock Details +++++++++++++++++++++++++++++++++++++++++++++
+
+  void updateStock(Stock updateStock, String stockId) async {
+    // print(transactionId);
+    // print(updateTransaction.clientName);
+    String tok = 'Bearer $token';
+    // print("Profile Data Reached Update Transaction HTTP Function");
+
+    Map<String, dynamic> transMap = {
+      "stockName": updateStock.stockName,
+      "quantity": updateStock.quantity,
+      "unitPrice": updateStock.unitPrice,
+      "category": updateStock.category,
+      "supplierName": updateStock.supplierName,
+    };
+
+    final response = await http.put(
+        Uri.parse(baseurl + 'auth/updateStock/${stockId}'),
+        headers: {'Authorization': tok},
+        body: transMap);
+    if (response.statusCode == 200) {
+      Fluttertoast.showToast(
+        msg: "Stock Updated",
+        backgroundColor: Colors.green,
+        fontSize: 16,
+        gravity: ToastGravity.TOP,
+      );
+    } else {}
+  }
 }

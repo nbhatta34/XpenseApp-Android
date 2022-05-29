@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:xpense_android/Screens/AddStocks.dart';
+import 'package:xpense_android/Screens/EditStock.dart';
 import 'package:xpense_android/Screens/HomeScreen.dart';
 import 'package:xpense_android/http/HttpUser.dart';
 import 'package:jiffy/jiffy.dart';
@@ -133,6 +134,16 @@ class _StocksState extends State<Stocks> {
                           children: [
                             InkWell(
                               onTap: () {},
+                              onLongPress: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => EditStock(
+                                        index: stockData.length - (index + 1),
+                                        stocks: stockData),
+                                  ),
+                                );
+                              },
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 8.0, horizontal: 10),
