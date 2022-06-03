@@ -45,6 +45,8 @@ dev_dependencies:
   image_picker: ^0.8.4+10
   jiffy: ^5.0.0
   flutter_spinkit: ^5.1.0
+  math_expressions: ^2.2.0
+
 
 
 
