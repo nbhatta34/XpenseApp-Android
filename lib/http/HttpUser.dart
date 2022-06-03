@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:xpense_android/model/StockModel.dart';
 import 'package:xpense_android/model/TransactionModel.dart';
 import 'package:xpense_android/model/UserModel.dart';
+import 'package:xpense_android/model/UserProfile.dart';
 import 'package:xpense_android/response/ResponseUser.dart';
 
 class HttpConnectUser {
@@ -257,5 +258,79 @@ class HttpConnectUser {
     } else {
       throw Exception('Failed To Load User Data');
     }
+  }
+
+  // +++++++++++++++++++++++++++++++ UPLOAD PROFILE IMAGE ++++++++++++++++++++++++++++++++++++++++++
+
+  Future<String> uploadImage(String filepath, String id) async {
+    print("Upload Image function ma pugyo");
+    print(filepath);
+    print(id);
+    try {
+      String tok = 'Bearer $token';
+      String route = 'auth/' + id + '/photo';
+      print(route);
+      String url = baseurl + route;
+      var request = http.MultipartRequest('PUT', Uri.parse(url));
+      //using the token in the headers
+      request.headers.addAll({
+        'Authorization': tok,
+      });
+      // need a filename
+
+      var ss = filepath.split('/').last;
+      print(ss);
+      // adding the file in the request
+      request.files.add(
+        http.MultipartFile(
+          'file',
+          File(filepath).readAsBytes().asStream(),
+          File(filepath).lengthSync(),
+          filename: ss,
+        ),
+      );
+
+      var response = await request.send();
+      var responseString = await response.stream.bytesToString();
+      if (response.statusCode == 200) {
+        return 'ok';
+      }
+    } catch (err) {
+      print('$err');
+    }
+    return 'something goes wrong';
+  }
+
+  // +++++++++++++++++++++++++++++++ Update User Profile +++++++++++++++++++++++++++++++++++++++++++++
+
+  void updateProfile(UserProfile updateUser, File? file) async {
+    print(file);
+    String s = '';
+    String tok = 'Bearer $token';
+    print("Profile Data Reached Update Profile HTTP Function");
+    Map<String, dynamic> userMap = {
+      "fname": updateUser.firstname,
+      "lname": updateUser.lastname,
+      "mobile": updateUser.mobile,
+      "address": updateUser.address,
+      "businessName": updateUser.businessName,
+      "pan_vat_no": updateUser.pan_vat_no,
+    };
+
+    final response = await http.put(Uri.parse(baseurl + 'auth/profile/'),
+        headers: {'Authorization': tok}, body: userMap);
+    if (response.statusCode == 200) {
+      print("status code 200 aayo");
+      if (file != null) {
+        print("image file null xaina");
+        print(file);
+        var jsonData = jsonDecode(response.body);
+        print(jsonData["_id"]);
+        var s = await uploadImage(file.path, jsonData['_id']);
+      }
+      if (s == "ok") {
+        Fluttertoast.showToast(msg: "Data uploaded successfully");
+      }
+    } else {}
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:xpense_android/Screens/EditProfile.dart';
 import 'package:xpense_android/Screens/LoginScreen.dart';
 import 'package:xpense_android/http/HttpUser.dart';
 import 'package:xpense_android/response/GetProfileResponse.dart';
@@ -91,6 +92,35 @@ class _ProfileState extends State<Profile> {
           child: Container(
             child: Column(
               children: [
+                Align(
+                  alignment: Alignment.topRight,
+                  child: IconButton(
+                    splashColor: Colors.transparent,
+                    onPressed: () async {
+                      setState(() {});
+                      final List listEditProfile = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EditProfile(
+                            list: [
+                              "${responseCatcher.data?.fname}",
+                              "${responseCatcher.data?.lname}",
+                              "${responseCatcher.data?.mobile}",
+                              "${responseCatcher.data?.address}",
+                              "${responseCatcher.data?.businessName}",
+                              "${responseCatcher.data?.pan_vat_no}",
+                              "${responseCatcher.data?.picture}",
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                    icon: Icon(
+                      Icons.edit,
+                      size: 30,
+                    ),
+                  ),
+                ),
                 Container(
                   width: 140,
                   height: 140,
