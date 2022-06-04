@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:xpense_android/model/ClientModel.dart';
 import 'package:xpense_android/model/StockModel.dart';
 import 'package:xpense_android/model/TransactionModel.dart';
 import 'package:xpense_android/model/UserModel.dart';
@@ -332,5 +333,45 @@ class HttpConnectUser {
         Fluttertoast.showToast(msg: "Data uploaded successfully");
       }
     } else {}
+  }
+  // ++++++++++++++++++++++++++++++++ Add Client Information  ++++++++++++++++++++++++++++++++++++++++
+
+  Future<bool> addClientInformation(Clients client) async {
+    String tok = 'Bearer $token';
+    Map<String, dynamic> clientMap = {
+      "clientName": client.clientName,
+      "mobile": client.mobile,
+      "address": client.address,
+      "email": client.email,
+    };
+
+    // print("Transaction Map: ${transactionMap}");
+
+    final response = await http.post(
+        Uri.parse(baseurl + 'auth/addClientInformation/'),
+        body: clientMap,
+        headers: {
+          'Authorization': tok,
+        });
+    if (response.statusCode == 200) {
+      var usrRes = ResponseUser.fromJson(jsonDecode(response.body));
+      return usrRes.success!;
+    } else {
+      return false;
+    }
+  }
+
+  // ++++++++++++++++++++++++++++++++ Get All Client Data ++++++++++++++++++++++++++++++++++++++++
+
+  Future viewClientInformation(String url) async {
+    String tok = 'Bearer $token';
+    var response = await http.get(Uri.parse(baseurl + url), headers: {
+      'Authorization': tok,
+    });
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed To Load Client Information');
+    }
   }
 }

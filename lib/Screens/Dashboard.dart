@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:xpense_android/Screens/AddClientInformation.dart';
 import 'package:xpense_android/Screens/AddEarning.dart';
 import 'package:xpense_android/Screens/EditTransaction.dart';
 import 'package:xpense_android/Screens/HomeScreen.dart';
@@ -22,10 +23,112 @@ class _DashBoardState extends State<DashBoard>
   int activeDay = 3;
 
   bool isOpened = false;
+  late AnimationController _animationController;
+  late Animation<Color?> _buttonColor;
+  late Animation<double> _animationIcon;
+  late Animation<double> _translateButton;
+  Curve _curve = Curves.linear;
+  double _fabHeight = 56.0;
+
   @override
   void initState() {
+    // fetchdata();
+    _animationController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 300))
+          ..addListener(() {
+            setState(() {});
+          });
+
+    _animationIcon =
+        Tween<double>(begin: 0.0, end: 1.0).animate(_animationController);
+
+    _buttonColor = ColorTween(begin: Colors.blue, end: Colors.red).animate(
+        CurvedAnimation(
+            parent: _animationController,
+            curve: Interval(0.00, 1.00, curve: Curves.linear)));
+
+    _translateButton = Tween<double>(begin: _fabHeight, end: -10.0).animate(
+        CurvedAnimation(
+            parent: _animationController,
+            curve: Interval(0.0, 0.4, curve: _curve)));
+
     super.initState();
-    fetchdata();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  Widget buttonAdd() {
+    return Container(
+      child: FloatingActionButton(
+        heroTag: "addEarning",
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddEarning(),
+            ),
+          );
+        },
+        tooltip: "Add Transactions",
+        child: Icon(Icons.add_chart_rounded),
+      ),
+    );
+  }
+
+  Widget buttonEdit() {
+    return Container(
+      child: FloatingActionButton(
+        heroTag: "addCategory",
+        onPressed: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AddClientInfo(),
+              ));
+        },
+        tooltip: "Add Category",
+        child: Icon(Icons.category),
+      ),
+    );
+  }
+
+  Widget buttonDelete() {
+    return Container(
+      child: FloatingActionButton(
+        heroTag: "addClientInfo",
+        onPressed: () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: ((context) => AddClientInfo())));
+        },
+        tooltip: "Add Client Information",
+        child: Icon(Icons.person_add),
+      ),
+    );
+  }
+
+  Widget buttonToggle() {
+    return Container(
+        child: FloatingActionButton(
+      backgroundColor: _buttonColor.value,
+      onPressed: animate,
+      tooltip: "Toggle",
+      child: AnimatedIcon(
+        icon: AnimatedIcons.menu_close,
+        progress: _animationIcon,
+      ),
+    ));
+  }
+
+  animate() {
+    if (!isOpened)
+      _animationController.forward();
+    else
+      _animationController.reverse();
+    isOpened = !isOpened;
   }
 
   fetchdata() async {
@@ -56,18 +159,35 @@ class _DashBoardState extends State<DashBoard>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AddEarning(),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          Transform(
+            transform: Matrix4.translationValues(
+              0.0,
+              _translateButton.value * 3.0,
+              0.0,
             ),
-          );
-        },
-        child: Icon(
-          Icons.addchart_rounded,
-        ),
+            child: buttonAdd(),
+          ),
+          Transform(
+            transform: Matrix4.translationValues(
+              0.0,
+              _translateButton.value * 2.0,
+              0.0,
+            ),
+            child: buttonEdit(),
+          ),
+          Transform(
+            transform: Matrix4.translationValues(
+              0.0,
+              _translateButton.value,
+              0.0,
+            ),
+            child: buttonDelete(),
+          ),
+          buttonToggle()
+        ],
       ),
       body: getBody(),
     );
