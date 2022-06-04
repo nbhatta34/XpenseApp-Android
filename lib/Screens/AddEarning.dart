@@ -28,17 +28,10 @@ class _AddEarningState extends State<AddEarning> {
 
   @override
   void initState() {
+    fetchdata();
     fetchdataClient();
     super.initState();
   }
-
-  List categories = [
-    "Print",
-    "Binding",
-    "Repair",
-    "Product",
-    "Others",
-  ];
 
   String itemName = "";
   String quantity = "";
@@ -57,6 +50,26 @@ class _AddEarningState extends State<AddEarning> {
 
   HttpConnectUser clients = HttpConnectUser();
   ClientResponse responseCatcher = ClientResponse();
+
+  fetchdata() async {
+    try {
+      var response = await clients.viewCategory("auth/addCategory/");
+
+      List categoryList = [];
+
+      for (var u in response["data"]) {
+        categoryList.add(u["categoryName"]);
+      }
+      setState(() {
+        categoryNameList = categoryList;
+        categoryNameList.add("Select Category");
+      });
+
+      return categoryList;
+    } catch (err) {
+      print(err);
+    }
+  }
 
   fetchdataClient() async {
     try {
@@ -79,6 +92,7 @@ class _AddEarningState extends State<AddEarning> {
   }
 
   List clientNameList = [];
+  List categoryNameList = [];
 
   @override
   Widget build(BuildContext context) {
@@ -140,157 +154,79 @@ class _AddEarningState extends State<AddEarning> {
         ),
       ),
     );
-
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text("Add Earning"),
-        ),
-        body: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 50,
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 8.0, horizontal: 28),
-                  child: TextFormField(
-                    textInputAction: TextInputAction.next,
-                    onSaved: (value) {
-                      itemName = value!;
-                    },
-                    controller: itemController,
-                    decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 10),
-                      filled: true,
-                      fillColor: Theme.of(context).cardColor,
-                      labelText: "Item Name",
-                      labelStyle: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xff3099EC),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.edit,
-                        color: Color(0xff3099EC),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Color.fromARGB(111, 161, 161, 161)),
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Color.fromARGB(111, 161, 161, 161)),
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
+    if (categoryNameList.length == 0) {
+      return SpinKitWave(
+        color: Colors.black54,
+      );
+    } else {
+      return SafeArea(
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text("Add Earning"),
+          ),
+          body: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 50,
                   ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 8.0, horizontal: 28),
-                  child: TextFormField(
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.next,
-                    onSaved: (value) {
-                      quantity = value!;
-                    },
-                    controller: quantityController,
-                    decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 10),
-                      filled: true,
-                      fillColor: Theme.of(context).cardColor,
-                      labelText: "Quantity",
-                      labelStyle: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xff3099EC)),
-                      prefixIcon: Icon(
-                        Icons.production_quantity_limits,
-                        color: Color(0xff3099EC),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Color.fromARGB(111, 161, 161, 161)),
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Color.fromARGB(111, 161, 161, 161)),
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 8.0, horizontal: 28),
-                  child: TextFormField(
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.done,
-                    onSaved: (value) {
-                      unitPrice = value!;
-                    },
-                    onChanged: (value) {
-                      try {
-                        double quantity = double.parse(quantityController.text);
-                        double price = double.parse(priceController.text);
-                        double sub_total = quantity * price;
-                        print(quantity * price);
-
-                        setState(
-                          () {
-                            total = sub_total;
-                          },
-                        );
-                      } catch (e) {
-                        print(e);
-                      }
-                    },
-                    controller: priceController,
-                    decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 10),
-                      filled: true,
-                      fillColor: Theme.of(context).cardColor,
-                      labelText: "Unit Price",
-                      labelStyle: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xff3099EC)),
-                      prefixIcon: Icon(
-                        Icons.attach_money,
-                        color: Color(0xff3099EC),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Color.fromARGB(111, 161, 161, 161)),
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Color.fromARGB(111, 161, 161, 161)),
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 8.0, horizontal: 28),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: DropdownButtonFormField<String>(
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 28),
+                    child: TextFormField(
+                      textInputAction: TextInputAction.next,
+                      onSaved: (value) {
+                        itemName = value!;
+                      },
+                      controller: itemController,
                       decoration: InputDecoration(
                         contentPadding: EdgeInsets.symmetric(vertical: 10),
                         filled: true,
                         fillColor: Theme.of(context).cardColor,
-                        labelText: "Category",
+                        labelText: "Item Name",
+                        labelStyle: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xff3099EC),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.edit,
+                          color: Color(0xff3099EC),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Color.fromARGB(111, 161, 161, 161)),
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Color.fromARGB(111, 161, 161, 161)),
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 28),
+                    child: TextFormField(
+                      keyboardType: TextInputType.number,
+                      textInputAction: TextInputAction.next,
+                      onSaved: (value) {
+                        quantity = value!;
+                      },
+                      controller: quantityController,
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.symmetric(vertical: 10),
+                        filled: true,
+                        fillColor: Theme.of(context).cardColor,
+                        labelText: "Quantity",
                         labelStyle: TextStyle(
                             fontWeight: FontWeight.w500,
                             color: Color(0xff3099EC)),
                         prefixIcon: Icon(
-                          Icons.category,
+                          Icons.production_quantity_limits,
                           color: Color(0xff3099EC),
                         ),
                         enabledBorder: OutlineInputBorder(
@@ -304,53 +240,45 @@ class _AddEarningState extends State<AddEarning> {
                           borderRadius: BorderRadius.circular(30),
                         ),
                       ),
-                      value: category,
-                      items: categories
-                          .map(
-                            (e) => DropdownMenuItem<String>(
-                              value: e,
-                              child: Text(e),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (item) => setState(
-                        () {
-                          category = item!;
-                        },
-                      ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 8.0, horizontal: 28),
-                  child: TypeAheadFormField(
-                    suggestionsCallback: (String pattern) =>
-                        clientNameList.where((element) => element
-                            .toLowerCase()
-                            .contains(pattern.toLowerCase())),
-                    itemBuilder: (context, item) {
-                      return ListTile(
-                        title: Text("${item}"),
-                      );
-                    },
-                    onSuggestionSelected: (suggestion) {
-                      this._typeAheadController.text = suggestion as String;
-                    },
-                    textFieldConfiguration: TextFieldConfiguration(
-                      controller: this._typeAheadController,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 28),
+                    child: TextFormField(
+                      keyboardType: TextInputType.number,
                       textInputAction: TextInputAction.done,
+                      onSaved: (value) {
+                        unitPrice = value!;
+                      },
+                      onChanged: (value) {
+                        try {
+                          double quantity =
+                              double.parse(quantityController.text);
+                          double price = double.parse(priceController.text);
+                          double sub_total = quantity * price;
+                          print(quantity * price);
+
+                          setState(
+                            () {
+                              total = sub_total;
+                            },
+                          );
+                        } catch (e) {
+                          print(e);
+                        }
+                      },
+                      controller: priceController,
                       decoration: InputDecoration(
                         contentPadding: EdgeInsets.symmetric(vertical: 10),
                         filled: true,
                         fillColor: Theme.of(context).cardColor,
-                        labelText: "Client Name",
+                        labelText: "Unit Price",
                         labelStyle: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xff3099EC),
-                        ),
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xff3099EC)),
                         prefixIcon: Icon(
-                          Icons.person,
+                          Icons.attach_money,
                           color: Color(0xff3099EC),
                         ),
                         enabledBorder: OutlineInputBorder(
@@ -365,51 +293,143 @@ class _AddEarningState extends State<AddEarning> {
                         ),
                       ),
                     ),
-                    onSaved: (value) {
-                      clientName = value!;
-                    },
                   ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 8.0, horizontal: 28),
-                  child: Container(
-                    alignment: Alignment.center,
-                    width: double.infinity,
-                    height: 55,
-                    decoration: BoxDecoration(
-                        color: Color.fromARGB(255, 11, 59, 73),
-                        borderRadius: BorderRadius.circular(30)),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            "Total Rs:  ${total.toString()}",
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.justify,
-                            style: GoogleFonts.poppins(
-                              fontSize: 27,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 28),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.symmetric(vertical: 10),
+                          filled: true,
+                          fillColor: Theme.of(context).cardColor,
+                          labelText: "Category",
+                          labelStyle: TextStyle(
                               fontWeight: FontWeight.w500,
-                              color: Colors.white,
-                            ),
+                              color: Color(0xff3099EC)),
+                          prefixIcon: Icon(
+                            Icons.category,
+                            color: Color(0xff3099EC),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Color.fromARGB(111, 161, 161, 161)),
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Color.fromARGB(111, 161, 161, 161)),
+                            borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                      ],
+                        value: category,
+                        items: categoryNameList
+                            .map(
+                              (e) => DropdownMenuItem<String>(
+                                value: e,
+                                child: Text(e),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (item) => setState(
+                          () {
+                            category = item!;
+                          },
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 28.0, horizontal: 28),
-                  child: addButton,
-                )
-              ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 28),
+                    child: TypeAheadFormField(
+                      suggestionsCallback: (String pattern) =>
+                          clientNameList.where((element) => element
+                              .toLowerCase()
+                              .contains(pattern.toLowerCase())),
+                      itemBuilder: (context, item) {
+                        return ListTile(
+                          title: Text("${item}"),
+                        );
+                      },
+                      onSuggestionSelected: (suggestion) {
+                        this._typeAheadController.text = suggestion as String;
+                      },
+                      textFieldConfiguration: TextFieldConfiguration(
+                        controller: this._typeAheadController,
+                        textInputAction: TextInputAction.done,
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.symmetric(vertical: 10),
+                          filled: true,
+                          fillColor: Theme.of(context).cardColor,
+                          labelText: "Client Name",
+                          labelStyle: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xff3099EC),
+                          ),
+                          prefixIcon: Icon(
+                            Icons.person,
+                            color: Color(0xff3099EC),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Color.fromARGB(111, 161, 161, 161)),
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                color: Color.fromARGB(111, 161, 161, 161)),
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                      ),
+                      onSaved: (value) {
+                        clientName = value!;
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 28),
+                    child: Container(
+                      alignment: Alignment.center,
+                      width: double.infinity,
+                      height: 55,
+                      decoration: BoxDecoration(
+                          color: Color.fromARGB(255, 11, 59, 73),
+                          borderRadius: BorderRadius.circular(30)),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              "Total Rs:  ${total.toString()}",
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.justify,
+                              style: GoogleFonts.poppins(
+                                fontSize: 27,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 28.0, horizontal: 28),
+                    child: addButton,
+                  )
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
   }
 }
 

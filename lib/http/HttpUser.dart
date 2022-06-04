@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:xpense_android/model/CategoryModel.dart';
 import 'package:xpense_android/model/ClientModel.dart';
 import 'package:xpense_android/model/StockModel.dart';
 import 'package:xpense_android/model/TransactionModel.dart';
@@ -373,5 +374,100 @@ class HttpConnectUser {
     } else {
       throw Exception('Failed To Load Client Information');
     }
+  }
+// ++++++++++++++++++++++++++++++++ Add Category  ++++++++++++++++++++++++++++++++++++++++
+
+  Future<bool> addCategory(Category category, File? file) async {
+    print(file);
+    String s = '';
+    String tok = 'Bearer $token';
+    Map<String, dynamic> categoryMap = {
+      "categoryName": category.categoryName,
+    };
+
+    final response = await http.post(Uri.parse(baseurl + 'auth/addCategory/'),
+        body: categoryMap,
+        headers: {
+          'Authorization': tok,
+        });
+    var jsonData = jsonDecode(response.body);
+    // print(jsonData["status"]);
+    // print(response.body);
+    if (jsonData["status"] == "200") {
+      print(response.body);
+      // var usrRes = ResponseUser.fromJson(jsonDecode(response.body));
+      var categoryId = jsonData["category"]["_id"];
+      var categoryName = jsonData["category"]["categoryName"];
+      print(categoryId);
+      if (file != null) {
+        print("image file null xaina");
+        print(file);
+        // var jsonData = jsonDecode(response.body);
+        // print(jsonData["_id"]);
+        var s = await uploadThumbnail(file.path, categoryId, categoryName);
+      }
+      if (s == "ok") {
+        Fluttertoast.showToast(msg: "Data uploaded successfully");
+      } else {}
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  // ++++++++++++++++++++++++++++++++ Get Category Data ++++++++++++++++++++++++++++++++++++++++
+
+  Future viewCategory(String url) async {
+    String tok = 'Bearer $token';
+    var response = await http.get(Uri.parse(baseurl + url), headers: {
+      'Authorization': tok,
+    });
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed To Load Category');
+    }
+  }
+
+  // +++++++++++++++++++++++++++++++ UPLOAD CATEGORY THUMBNAIL IMAGE ++++++++++++++++++++++++++++++++++++++++++
+
+  Future<String> uploadThumbnail(
+      String filepath, String categoryId, String categoryName) async {
+    print("Upload Thumbnail function ma pugyo");
+    print(filepath);
+    print(categoryId);
+    try {
+      String tok = 'Bearer $token';
+      String route = 'auth/' + categoryId + '/' + categoryName + '/photo';
+      print(route);
+      String url = baseurl + route;
+      var request = http.MultipartRequest('POST', Uri.parse(url));
+      //using the token in the headers
+      request.headers.addAll({
+        'Authorization': tok,
+      });
+      // need a filename
+
+      var ss = filepath.split('/').last;
+      print(ss);
+      // adding the file in the request
+      request.files.add(
+        http.MultipartFile(
+          'file',
+          File(filepath).readAsBytes().asStream(),
+          File(filepath).lengthSync(),
+          filename: ss,
+        ),
+      );
+
+      var response = await request.send();
+      var responseString = await response.stream.bytesToString();
+      if (response.statusCode == 200) {
+        return 'ok';
+      }
+    } catch (err) {
+      print('$err');
+    }
+    return 'something goes wrong';
   }
 }

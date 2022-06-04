@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:xpense_android/Screens/AddCategory.dart';
 import 'package:xpense_android/Screens/AddClientInformation.dart';
 import 'package:xpense_android/Screens/AddEarning.dart';
 import 'package:xpense_android/Screens/EditTransaction.dart';
@@ -87,7 +88,7 @@ class _DashBoardState extends State<DashBoard>
           Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => AddClientInfo(),
+                builder: (context) => AddCategory(),
               ));
         },
         tooltip: "Add Category",
