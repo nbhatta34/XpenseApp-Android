@@ -421,6 +421,39 @@ class _AddCategoryState extends State<AddCategory> {
                                                 ],
                                               ),
                                             ),
+                                            IconButton(
+                                              onPressed: () {
+                                                showDialog<String>(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) =>
+                                                          AlertDialog(
+                                                    title: const Text(
+                                                        'Are you sure you want to delete?'),
+                                                    content: const Text(
+                                                        'Category will be deleted permanently.'),
+                                                    actions: <Widget>[
+                                                      TextButton(
+                                                        onPressed: () =>
+                                                            Navigator.pop(
+                                                                context,
+                                                                'Cancel'),
+                                                        child: const Text(
+                                                            'Cancel'),
+                                                      ),
+                                                      TextButton(
+                                                        onPressed: () {},
+                                                        child: const Text('OK'),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              },
+                                              icon: Icon(
+                                                Icons.delete_outline,
+                                                color: Colors.red,
+                                              ),
+                                            )
                                           ],
                                         ),
                                       ],
