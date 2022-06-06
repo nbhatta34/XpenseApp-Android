@@ -1,11 +1,10 @@
-// import 'dart:html';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:xpense_android/Screens/HomeScreen.dart';
 import 'package:xpense_android/http/HttpUser.dart';
 import 'package:xpense_android/model/ClientModel.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class AddClientInfo extends StatefulWidget {
   const AddClientInfo({Key? key}) : super(key: key);
@@ -26,6 +25,8 @@ class _AddClientInfoState extends State<AddClientInfo> {
     var res = HttpConnectUser().addClientInformation(client);
     return res;
   }
+
+  fetchdataClient() async {}
 
   @override
   Widget build(BuildContext context) {
@@ -237,6 +238,44 @@ class _AddClientInfoState extends State<AddClientInfo> {
                 ),
               ),
             ),
+            Expanded(
+              child: FutureBuilder(
+                future: fetchdataClient(),
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (snapshot.data == null) {
+                    return SpinKitWave(
+                      color: Colors.black54,
+                    );
+                  } else {
+                    if (snapshot.data?.length == 0) {
+                      return Container(
+                        child: Center(
+                          child: Text(
+                            "No Client Information To Show",
+                            style: GoogleFonts.poppins(
+                                fontSize: 23,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black54),
+                          ),
+                        ),
+                      );
+                    } else {
+                      return Container(
+                        child: Center(
+                          child: Text(
+                            "Client Information",
+                            style: GoogleFonts.poppins(
+                                fontSize: 23,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black54),
+                          ),
+                        ),
+                      );
+                    }
+                  }
+                },
+              ),
+            )
           ],
         ),
       ),
