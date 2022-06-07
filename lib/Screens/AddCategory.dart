@@ -6,6 +6,7 @@ import 'package:xpense_android/Screens/HomeScreen.dart';
 import 'package:xpense_android/http/HttpUser.dart';
 import 'package:xpense_android/model/CategoryModel.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class AddCategory extends StatefulWidget {
   const AddCategory({Key? key}) : super(key: key);
@@ -49,6 +50,7 @@ class _AddCategoryState extends State<AddCategory> {
     });
   }
 
+  fetchdataCategory() {}
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -278,6 +280,128 @@ class _AddCategoryState extends State<AddCategory> {
                 ),
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Recently Added Categories",
+                    style: GoogleFonts.poppins(
+                        fontSize: 18, fontWeight: FontWeight.w500),
+                  )),
+            ),
+            Expanded(
+              child: FutureBuilder(
+                future: fetchdataCategory(),
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (snapshot.data == null) {
+                    return SpinKitWave(
+                      color: Colors.black54,
+                    );
+                  } else {
+                    if (snapshot.data?.length == 0) {
+                      return Container(
+                        child: Center(
+                          child: Text(
+                            "No Category Data To Show",
+                            style: GoogleFonts.poppins(
+                                fontSize: 23,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black54),
+                          ),
+                        ),
+                      );
+                    } else {
+                      return ListView.builder(
+                        itemCount: 3,
+                        itemBuilder: (context, index) {
+                          return Card(
+                            child: Row(
+                              children: [
+                                InkWell(
+                                  onTap: () {},
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 10),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Container(
+                                              width: (MediaQuery.of(context)
+                                                          .size
+                                                          .width -
+                                                      60) *
+                                                  0.65,
+                                              child: Row(
+                                                children: [
+                                                  Container(
+                                                    width: 50,
+                                                    height: 50,
+                                                    decoration: BoxDecoration(
+                                                      border: Border.all(
+                                                          width: 1,
+                                                          color: Colors.white),
+                                                      shape: BoxShape.circle,
+                                                      image: DecorationImage(
+                                                        fit: BoxFit.cover,
+                                                        image: NetworkImage(
+                                                            "http://10.0.2.2:3000/uploads/${snapshot.data?[snapshot.data.length - (index + 1)].categoryName}_${snapshot.data?[snapshot.data.length - (index + 1)].userId}.png"),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: 15),
+                                                  Container(
+                                                    width:
+                                                        (MediaQuery.of(context)
+                                                                    .size
+                                                                    .width -
+                                                                110) *
+                                                            0.5,
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          "${snapshot.data?[snapshot.data.length - (index + 1)].categoryName}",
+                                                          style: TextStyle(
+                                                              fontSize: 15,
+                                                              color:
+                                                                  Colors.black,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500),
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    }
+                  }
+                },
+              ),
+            )
           ],
         ),
       ),
