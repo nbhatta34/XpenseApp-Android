@@ -420,6 +420,58 @@ class _AddClientInfoState extends State<AddClientInfo> {
                                                         ),
                                                       ],
                                                     ),
+                                                  ),
+                                                  Container(
+                                                    width:
+                                                        (MediaQuery.of(context)
+                                                                    .size
+                                                                    .width -
+                                                                0) /
+                                                            2.82,
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment.end,
+                                                      children: [
+                                                        IconButton(
+                                                          onPressed: () {
+                                                            showDialog<String>(
+                                                              context: context,
+                                                              builder: (BuildContext
+                                                                      context) =>
+                                                                  AlertDialog(
+                                                                title: const Text(
+                                                                    'Are you sure you want to delete?'),
+                                                                content: const Text(
+                                                                    'Client information will be deleted permanently.'),
+                                                                actions: <
+                                                                    Widget>[
+                                                                  TextButton(
+                                                                    onPressed: () =>
+                                                                        Navigator.pop(
+                                                                            context,
+                                                                            'Cancel'),
+                                                                    child: const Text(
+                                                                        'Cancel'),
+                                                                  ),
+                                                                  TextButton(
+                                                                    onPressed:
+                                                                        () {},
+                                                                    child:
+                                                                        const Text(
+                                                                            'OK'),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            );
+                                                          },
+                                                          icon: Icon(
+                                                            Icons
+                                                                .delete_outline,
+                                                            color: Colors.red,
+                                                          ),
+                                                        )
+                                                      ],
+                                                    ),
                                                   )
                                                 ],
                                               ),
