@@ -14,6 +14,8 @@ class AddClientInfo extends StatefulWidget {
 }
 
 class _AddClientInfoState extends State<AddClientInfo> {
+  HttpConnectUser clients = HttpConnectUser();
+
   final _formKey = GlobalKey<FormState>();
 
   String clientName = "";
@@ -26,7 +28,32 @@ class _AddClientInfoState extends State<AddClientInfo> {
     return res;
   }
 
-  fetchdataClient() async {}
+  fetchdataClient() async {
+    try {
+      var response =
+          await clients.viewClientInformation("auth/addClientInformation/");
+
+      print(response);
+
+      List<ClientInfoFetcher> clientNameList = [];
+
+      for (var u in response["data"]) {
+        ClientInfoFetcher client = ClientInfoFetcher(
+          u["clientName"],
+          u["mobile"],
+          u["email"],
+          u["address"],
+          u["_id"],
+        );
+
+        clientNameList.add(client);
+      }
+
+      return clientNameList;
+    } catch (err) {
+      print(err);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -281,4 +308,20 @@ class _AddClientInfoState extends State<AddClientInfo> {
       ),
     ));
   }
+}
+
+class ClientInfoFetcher {
+  final String? clientName;
+  final String? mobile;
+  final String? email;
+  final String? address;
+  final String? clientId;
+
+  ClientInfoFetcher(
+    this.clientName,
+    this.mobile,
+    this.email,
+    this.address,
+    this.clientId,
+  );
 }
