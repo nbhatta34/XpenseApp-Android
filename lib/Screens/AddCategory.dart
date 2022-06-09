@@ -50,7 +50,32 @@ class _AddCategoryState extends State<AddCategory> {
     });
   }
 
-  fetchdataCategory() {}
+  HttpConnectUser cat = HttpConnectUser();
+  fetchdataCategory() async {
+    try {
+      var response = await cat.viewCategory("auth/addCategory/");
+
+      print(response);
+
+      List<CategoryInfoFetcher> categoryNameList = [];
+
+      for (var u in response["data"]) {
+        CategoryInfoFetcher client = CategoryInfoFetcher(
+          u["categoryName"],
+          u["picture"],
+          u["_id"],
+          u["userId"],
+        );
+
+        categoryNameList.add(client);
+      }
+
+      return categoryNameList;
+    } catch (err) {
+      print(err);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -407,4 +432,18 @@ class _AddCategoryState extends State<AddCategory> {
       ),
     ));
   }
+}
+
+class CategoryInfoFetcher {
+  final String? categoryName;
+  final String? picture;
+  final String? categoryId;
+  final String? userId;
+
+  CategoryInfoFetcher(
+    this.categoryName,
+    this.picture,
+    this.categoryId,
+    this.userId,
+  );
 }
