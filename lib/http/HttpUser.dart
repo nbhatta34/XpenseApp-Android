@@ -488,4 +488,22 @@ class HttpConnectUser {
     } else {}
   }
 // ------------------------------------------------------------------------------------------------------
+// +++++++++++++++++++++++++++++++ Delete Category Details +++++++++++++++++++++++++++++++++++++++++++++
+
+  void deleteCategory(String categoryId) async {
+    String tok = 'Bearer $token';
+
+    final response = await http.delete(
+        Uri.parse(baseurl + 'auth/deleteCategory/${categoryId}'),
+        headers: {'Authorization': tok});
+    if (response.statusCode == 200) {
+      Fluttertoast.showToast(
+        msg: "Category Deleted",
+        backgroundColor: Colors.green,
+        fontSize: 16,
+        gravity: ToastGravity.TOP,
+      );
+    } else {}
+  }
+// -------------------------------------------------------------------------------------------------------
 }

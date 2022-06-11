@@ -442,7 +442,23 @@ class _AddCategoryState extends State<AddCategory> {
                                                             'Cancel'),
                                                       ),
                                                       TextButton(
-                                                        onPressed: () {},
+                                                        onPressed: () {
+                                                          HttpConnectUser()
+                                                              .deleteCategory(snapshot
+                                                                  .data?[snapshot
+                                                                          .data
+                                                                          .length -
+                                                                      (index +
+                                                                          1)]
+                                                                  .categoryId);
+                                                          Navigator.pushReplacement(
+                                                              context,
+                                                              MaterialPageRoute(
+                                                                builder:
+                                                                    (context) =>
+                                                                        AddCategory(),
+                                                              ));
+                                                        },
                                                         child: const Text('OK'),
                                                       ),
                                                     ],
