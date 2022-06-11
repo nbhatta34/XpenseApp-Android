@@ -287,16 +287,153 @@ class _AddClientInfoState extends State<AddClientInfo> {
                         ),
                       );
                     } else {
-                      return Container(
-                        child: Center(
-                          child: Text(
-                            "Client Information",
-                            style: GoogleFonts.poppins(
-                                fontSize: 23,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black54),
-                          ),
+                      final List<ClientInfoFetcher> clientData = List.generate(
+                        snapshot.data.length,
+                        (index) => ClientInfoFetcher(
+                          '${snapshot.data?[index].clientName}',
+                          '${snapshot.data?[index].mobile}',
+                          '${snapshot.data?[index].email}',
+                          '${snapshot.data?[index].address}',
+                          '${snapshot.data?[index].clientId}',
                         ),
+                      );
+                      return ListView.builder(
+                        itemCount: clientData.length,
+                        itemBuilder: (context, index) {
+                          return Card(
+                            child: Row(
+                              children: [
+                                InkWell(
+                                  onTap: () {},
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 10),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Container(
+                                              width: (MediaQuery.of(context)
+                                                          .size
+                                                          .width -
+                                                      60) *
+                                                  0.65,
+                                              child: Row(
+                                                children: [
+                                                  Container(
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          "${snapshot.data?[snapshot.data.length - (index + 1)].clientName}",
+                                                          style: TextStyle(
+                                                              fontSize: 15,
+                                                              color: Colors
+                                                                  .black
+                                                                  .withOpacity(
+                                                                      0.9),
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500),
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        ),
+                                                        SizedBox(height: 5),
+                                                        Row(
+                                                          children: [
+                                                            Icon(
+                                                              Icons
+                                                                  .phone_android,
+                                                              size: 13,
+                                                            ),
+                                                            Text(
+                                                              "  ${snapshot.data?[snapshot.data.length - (index + 1)].mobile}",
+                                                              style: TextStyle(
+                                                                  fontSize: 12,
+                                                                  color: Colors
+                                                                      .black
+                                                                      .withOpacity(
+                                                                          0.6),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w400),
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        SizedBox(height: 5),
+                                                        Row(
+                                                          children: [
+                                                            Icon(
+                                                              Icons.email,
+                                                              size: 13,
+                                                            ),
+                                                            Text(
+                                                              "  ${snapshot.data?[snapshot.data.length - (index + 1)].email}",
+                                                              style: TextStyle(
+                                                                  fontSize: 12,
+                                                                  color: Colors
+                                                                      .black
+                                                                      .withOpacity(
+                                                                          0.6),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w400),
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        SizedBox(height: 5),
+                                                        Row(
+                                                          children: [
+                                                            Icon(
+                                                                Icons
+                                                                    .location_on,
+                                                                size: 13),
+                                                            Text(
+                                                              "  ${snapshot.data?[snapshot.data.length - (index + 1)].address}",
+                                                              style: TextStyle(
+                                                                  fontSize: 12,
+                                                                  color: Colors
+                                                                      .black
+                                                                      .withOpacity(
+                                                                          0.6),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w400),
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          );
+                        },
                       );
                     }
                   }
