@@ -455,7 +455,18 @@ class _AddClientInfoState extends State<AddClientInfo> {
                                                                   ),
                                                                   TextButton(
                                                                     onPressed:
-                                                                        () {},
+                                                                        () {
+                                                                      HttpConnectUser().deleteClientInformation(snapshot
+                                                                          .data?[snapshot.data.length -
+                                                                              (index + 1)]
+                                                                          .clientId);
+                                                                      Navigator.pushReplacement(
+                                                                          context,
+                                                                          MaterialPageRoute(
+                                                                            builder: (context) =>
+                                                                                AddClientInfo(),
+                                                                          ));
+                                                                    },
                                                                     child:
                                                                         const Text(
                                                                             'OK'),

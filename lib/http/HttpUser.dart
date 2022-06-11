@@ -470,4 +470,22 @@ class HttpConnectUser {
     }
     return 'something goes wrong';
   }
+  // +++++++++++++++++++++++++++++++ Delete Client Details +++++++++++++++++++++++++++++++++++++++++++++
+
+  void deleteClientInformation(String clientId) async {
+    String tok = 'Bearer $token';
+
+    final response = await http.delete(
+        Uri.parse(baseurl + 'auth/deleteClientInformation/${clientId}'),
+        headers: {'Authorization': tok});
+    if (response.statusCode == 200) {
+      Fluttertoast.showToast(
+        msg: "Client Information Deleted",
+        backgroundColor: Colors.green,
+        fontSize: 16,
+        gravity: ToastGravity.TOP,
+      );
+    } else {}
+  }
+// ------------------------------------------------------------------------------------------------------
 }
