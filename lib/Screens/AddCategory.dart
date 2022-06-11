@@ -337,8 +337,18 @@ class _AddCategoryState extends State<AddCategory> {
                         ),
                       );
                     } else {
+                      final List<CategoryInfoFetcher> transactionData =
+                          List.generate(
+                        snapshot.data.length,
+                        (index) => CategoryInfoFetcher(
+                          '${snapshot.data?[index].categoryName}',
+                          '${snapshot.data?[index].picture}',
+                          '${snapshot.data?[index].categoryId}',
+                          '${snapshot.data?[index].userId}',
+                        ),
+                      );
                       return ListView.builder(
-                        itemCount: 3,
+                        itemCount: transactionData.length,
                         itemBuilder: (context, index) {
                           return Card(
                             child: Row(
