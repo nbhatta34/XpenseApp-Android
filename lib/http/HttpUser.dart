@@ -506,4 +506,39 @@ class HttpConnectUser {
     } else {}
   }
 // -------------------------------------------------------------------------------------------------------
+  // ++++++++++++++++++++++++++++++++ Add Stock Category  ++++++++++++++++++++++++++++++++++++++++
+
+  Future<bool> addStockCategory(Category category, File? file) async {
+    print("file");
+    String s = '';
+    String tok = 'Bearer $token';
+    Map<String, dynamic> categoryMap = {
+      "categoryName": category.categoryName,
+    };
+
+    final response = await http.post(
+        Uri.parse(baseurl + 'auth/addStockCategory/'),
+        body: categoryMap,
+        headers: {
+          'Authorization': tok,
+        });
+    var jsonData = jsonDecode(response.body);
+    if (jsonData["status"] == "200") {
+      print(response.body);
+      var categoryId = jsonData["stockCategory"]["_id"];
+      var categoryName = jsonData["stockCategory"]["categoryName"];
+      print(categoryId);
+      if (file != null) {
+        print("image file null xaina");
+        print(file);
+        var s = await uploadThumbnail(file.path, categoryId, categoryName);
+      }
+      if (s == "ok") {
+        Fluttertoast.showToast(msg: "Data uploaded successfully");
+      } else {}
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
