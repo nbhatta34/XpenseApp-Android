@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:xpense_android/model/CategoryModel.dart';
 import 'package:xpense_android/model/ClientModel.dart';
 import 'package:xpense_android/model/StockModel.dart';
+import 'package:xpense_android/model/SupplierModel.dart';
 import 'package:xpense_android/model/TransactionModel.dart';
 import 'package:xpense_android/model/UserModel.dart';
 import 'package:xpense_android/model/UserProfile.dart';
@@ -506,4 +507,29 @@ class HttpConnectUser {
     } else {}
   }
 // -------------------------------------------------------------------------------------------------------
+//  ++++++++++++++++++++++++++++++++ Add Supplier Information  ++++++++++++++++++++++++++++++++++++++++
+
+  Future<bool> addSupplierInformation(Suppliers supplier) async {
+    String tok = 'Bearer $token';
+    Map<String, dynamic> supplierMap = {
+      "supplierName": supplier.supplierName,
+      "mobile": supplier.mobile,
+      "address": supplier.address,
+      "email": supplier.email,
+    };
+
+    final response = await http.post(
+        Uri.parse(baseurl + 'auth/addSupplierInformation/'),
+        body: supplierMap,
+        headers: {
+          'Authorization': tok,
+        });
+    if (response.statusCode == 200) {
+      var usrRes = ResponseUser.fromJson(jsonDecode(response.body));
+      return usrRes.success!;
+    } else {
+      return false;
+    }
+  }
+  //--------------------------------------------------------------------------------------------
 }
