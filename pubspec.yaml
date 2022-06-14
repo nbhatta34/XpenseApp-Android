@@ -48,6 +48,7 @@ dev_dependencies:
   math_expressions: ^2.2.0
   flutter_typeahead: ^4.0.0
   flutter_riverpod: ^1.0.3
+  syncfusion_flutter_charts: ^20.1.59
 
 
 
