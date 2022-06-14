@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:xpense_android/http/HttpUser.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:intl/intl.dart';
 
@@ -12,87 +10,67 @@ class Statistics extends StatefulWidget {
 }
 
 class _StatisticsState extends State<Statistics> {
-  HttpConnectUser transaction = HttpConnectUser();
-
+  late List<GDPData> _chartData;
   late TooltipBehavior _tooltipBehavior;
-
-  List<PieChartModel> pieChartData = [];
-  bool loading = true;
 
   @override
   void initState() {
-    super.initState();
+    _chartData = getChartData();
     _tooltipBehavior = TooltipBehavior(enable: true);
-
-    getDataPie();
-  }
-
-  // Fetching data for pie chart from backend
-  void getDataPie() async {
-    var response =
-        await transaction.viewTransactions("auth/totalEarningInCategories/");
-
-    List<PieChartModel> pieData = [];
-
-    for (var u in response) {
-      PieChartModel trans = PieChartModel(
-        u["grand_total"],
-        u["_id"],
-      );
-      pieData.add(trans);
-    }
-
-    setState(() {
-      pieChartData = pieData;
-      loading = false;
-    });
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
+    return SafeArea(
+      child: Scaffold(
+        body: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Text(
-                "Income From All Categories in Rs.",
-                style: GoogleFonts.poppins(
-                    fontSize: 23, fontWeight: FontWeight.w500),
-              ),
+              child: SfCartesianChart(
+                  title: ChartTitle(text: 'June 2022 Earning'),
+                  tooltipBehavior: _tooltipBehavior,
+                  series: <ChartSeries>[
+                    ColumnSeries<GDPData, String>(
+                        name: 'Sales',
+                        dataSource: _chartData,
+                        xValueMapper: (GDPData gdp, _) => gdp.continent,
+                        yValueMapper: (GDPData gdp, _) => gdp.gdp,
+                        enableTooltip: true)
+                  ],
+                  primaryXAxis: CategoryAxis(),
+                  primaryYAxis: NumericAxis(
+                    edgeLabelPlacement: EdgeLabelPlacement.shift,
+                    numberFormat: NumberFormat.currency(
+                      locale: 'en_In',
+                      symbol: "Rs.",
+                      decimalDigits: 0,
+                    ),
+                  )),
             ),
-            SfCircularChart(
-              legend: Legend(
-                isVisible: true,
-                overflowMode: LegendItemOverflowMode.wrap,
-              ),
-              tooltipBehavior: _tooltipBehavior,
-              series: <CircularSeries>[
-                PieSeries<PieChartModel, String>(
-                  dataSource: pieChartData,
-                  xValueMapper: (PieChartModel data, _) => data.category,
-                  yValueMapper: (PieChartModel data, _) => data.grandTotal,
-                  dataLabelSettings: DataLabelSettings(isVisible: true),
-                  enableTooltip: true,
-                )
-              ],
-            )
           ],
         ),
       ),
     );
   }
+
+  List<GDPData> getChartData() {
+    final List<GDPData> chartData = [
+      GDPData('June 1', 1600),
+      GDPData('June 4', 2490),
+      GDPData('June 6', 2900),
+      GDPData('June 8', 23050),
+      GDPData('June 10', 24880),
+      GDPData('June 15', 34390),
+    ];
+    return chartData;
+  }
 }
 
-// Pie Chart Model
-class PieChartModel {
-  final int grandTotal;
-  final String category;
-
-  PieChartModel(
-    this.grandTotal,
-    this.category,
-  );
+class GDPData {
+  GDPData(this.continent, this.gdp);
+  final String continent;
+  final double gdp;
 }
