@@ -541,4 +541,17 @@ class HttpConnectUser {
       return false;
     }
   }
+  // ++++++++++++++++++++++++++++++++ Get Stock Category Data ++++++++++++++++++++++++++++++++++++++++
+
+  Future viewStockCategory(String url) async {
+    String tok = 'Bearer $token';
+    var response = await http.get(Uri.parse(baseurl + url), headers: {
+      'Authorization': tok,
+    });
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed To Load Category');
+    }
+  }
 }
