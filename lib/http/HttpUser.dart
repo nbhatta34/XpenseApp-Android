@@ -546,4 +546,22 @@ class HttpConnectUser {
     }
   }
 // -----------------------------------------------------------------------------------------------------
+// +++++++++++++++++++++++++++++++ Delete Supplier Details +++++++++++++++++++++++++++++++++++++++++++++
+
+  void deleteSupplierInformation(String supplierId) async {
+    String tok = 'Bearer $token';
+
+    final response = await http.delete(
+        Uri.parse(baseurl + 'auth/deleteSupplierInformation/${supplierId}'),
+        headers: {'Authorization': tok});
+    if (response.statusCode == 200) {
+      Fluttertoast.showToast(
+        msg: "Supplier Information Deleted",
+        backgroundColor: Colors.green,
+        fontSize: 16,
+        gravity: ToastGravity.TOP,
+      );
+    } else {}
+  }
+// -------------------------------------------------------------------------------------------------------
 }

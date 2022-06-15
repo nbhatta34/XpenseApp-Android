@@ -16,6 +16,7 @@ class AddSupplierInfo extends StatefulWidget {
 class _AddSupplierInfoState extends State<AddSupplierInfo> {
   @override
   void initState() {
+    fetchdataClient();
     super.initState();
   }
 
@@ -31,6 +32,33 @@ class _AddSupplierInfoState extends State<AddSupplierInfo> {
   Future<bool> addSupplierInfo(Suppliers supplier) {
     var res = HttpConnectUser().addSupplierInformation(supplier);
     return res;
+  }
+
+  fetchdataClient() async {
+    try {
+      var response = await suppliers
+          .viewSupplierInformation("auth/addSupplierInformation/");
+
+      print(response);
+
+      List<SupplierInfoFetcher> supplierNameList = [];
+
+      for (var u in response["data"]) {
+        SupplierInfoFetcher supplier = SupplierInfoFetcher(
+          u["supplierName"],
+          u["mobile"],
+          u["email"],
+          u["address"],
+          u["_id"],
+        );
+
+        supplierNameList.add(supplier);
+      }
+
+      return supplierNameList;
+    } catch (err) {
+      print(err);
+    }
   }
 
   @override
@@ -243,6 +271,268 @@ class _AddSupplierInfoState extends State<AddSupplierInfo> {
                 ),
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Recently Added Suppliers",
+                    style: GoogleFonts.poppins(
+                        fontSize: 18, fontWeight: FontWeight.w500),
+                  )),
+            ),
+            Expanded(
+              child: FutureBuilder(
+                future: fetchdataClient(),
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (snapshot.data == null) {
+                    return SpinKitWave(
+                      color: Colors.black54,
+                    );
+                  } else {
+                    if (snapshot.data?.length == 0) {
+                      return Container(
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "No Supplier Information To Show",
+                                style: GoogleFonts.poppins(
+                                    fontSize: 23,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black54),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    } else {
+                      final List<SupplierInfoFetcher> supplierData =
+                          List.generate(
+                        snapshot.data.length,
+                        (index) => SupplierInfoFetcher(
+                          '${snapshot.data?[index].supplierName}',
+                          '${snapshot.data?[index].mobile}',
+                          '${snapshot.data?[index].email}',
+                          '${snapshot.data?[index].address}',
+                          '${snapshot.data?[index].supplierId}',
+                        ),
+                      );
+                      return ListView.builder(
+                        itemCount: supplierData.length,
+                        itemBuilder: (context, index) {
+                          return Card(
+                            child: Row(
+                              children: [
+                                InkWell(
+                                  onTap: () {},
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 10),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Container(
+                                              width: (MediaQuery.of(context)
+                                                          .size
+                                                          .width -
+                                                      60) *
+                                                  0.65,
+                                              child: Row(
+                                                children: [
+                                                  Container(
+                                                    // width:
+                                                    //     (MediaQuery.of(context)
+                                                    //                 .size
+                                                    //                 .width -
+                                                    //             110) *
+                                                    //         0.75,
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          "${snapshot.data?[snapshot.data.length - (index + 1)].supplierName}",
+                                                          style: TextStyle(
+                                                              fontSize: 15,
+                                                              color: Colors
+                                                                  .black
+                                                                  .withOpacity(
+                                                                      0.9),
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500),
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        ),
+                                                        SizedBox(height: 5),
+                                                        Row(
+                                                          children: [
+                                                            Icon(
+                                                              Icons
+                                                                  .phone_android,
+                                                              size: 13,
+                                                            ),
+                                                            Text(
+                                                              "  ${snapshot.data?[snapshot.data.length - (index + 1)].mobile}",
+                                                              style: TextStyle(
+                                                                  fontSize: 12,
+                                                                  color: Colors
+                                                                      .black
+                                                                      .withOpacity(
+                                                                          0.6),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w400),
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        SizedBox(height: 5),
+                                                        Row(
+                                                          children: [
+                                                            Icon(
+                                                              Icons.email,
+                                                              size: 13,
+                                                            ),
+                                                            Text(
+                                                              "  ${snapshot.data?[snapshot.data.length - (index + 1)].email}",
+                                                              style: TextStyle(
+                                                                  fontSize: 12,
+                                                                  color: Colors
+                                                                      .black
+                                                                      .withOpacity(
+                                                                          0.6),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w400),
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        SizedBox(height: 5),
+                                                        Row(
+                                                          children: [
+                                                            Icon(
+                                                                Icons
+                                                                    .location_on,
+                                                                size: 13),
+                                                            Text(
+                                                              "  ${snapshot.data?[snapshot.data.length - (index + 1)].address}",
+                                                              style: TextStyle(
+                                                                  fontSize: 12,
+                                                                  color: Colors
+                                                                      .black
+                                                                      .withOpacity(
+                                                                          0.6),
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w400),
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                            Container(
+                                              width: (MediaQuery.of(context)
+                                                          .size
+                                                          .width -
+                                                      0) /
+                                                  2.82,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  IconButton(
+                                                    onPressed: () {
+                                                      showDialog<String>(
+                                                        context: context,
+                                                        builder: (BuildContext
+                                                                context) =>
+                                                            AlertDialog(
+                                                          title: const Text(
+                                                              'Are you sure you want to delete?'),
+                                                          content: const Text(
+                                                              'Supplier information will be deleted permanently.'),
+                                                          actions: <Widget>[
+                                                            TextButton(
+                                                              onPressed: () =>
+                                                                  Navigator.pop(
+                                                                      context,
+                                                                      'Cancel'),
+                                                              child: const Text(
+                                                                  'Cancel'),
+                                                            ),
+                                                            TextButton(
+                                                              onPressed: () {
+                                                                HttpConnectUser().deleteSupplierInformation(snapshot
+                                                                    .data?[snapshot
+                                                                            .data
+                                                                            .length -
+                                                                        (index +
+                                                                            1)]
+                                                                    .supplierId);
+                                                                Navigator
+                                                                    .pushReplacement(
+                                                                        context,
+                                                                        MaterialPageRoute(
+                                                                          builder: (context) =>
+                                                                              AddSupplierInfo(),
+                                                                        ));
+                                                                // Navigator.pop(
+                                                                //     context, 'OK');
+                                                                // child:
+                                                              },
+                                                              child: const Text(
+                                                                  'OK'),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      );
+                                                    },
+                                                    icon: Icon(
+                                                      Icons.delete_outline,
+                                                      color: Colors.red,
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    }
+                  }
+                },
+              ),
+            )
           ],
         ),
       ),
