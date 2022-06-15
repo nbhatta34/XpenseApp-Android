@@ -554,4 +554,45 @@ class HttpConnectUser {
       throw Exception('Failed To Load Category');
     }
   }
+  // +++++++++++++++++++++++++++++++ UPLOAD STOCK CATEGORY THUMBNAIL IMAGE ++++++++++++++++++++++++++++++++++++++++++
+
+  Future<String> uploadStockThumbnail(
+      String filepath, String categoryId, String categoryName) async {
+    print("Upload Thumbnail function ma pugyo");
+    print(filepath);
+    print(categoryId);
+    try {
+      String tok = 'Bearer $token';
+      String route = 'auth/' + categoryId + '/' + categoryName + '/photo';
+      print(route);
+      String url = baseurl + route;
+      var request = http.MultipartRequest('POST', Uri.parse(url));
+      //using the token in the headers
+      request.headers.addAll({
+        'Authorization': tok,
+      });
+      // need a filename
+
+      var ss = filepath.split('/').last;
+      print(ss);
+      // adding the file in the request
+      request.files.add(
+        http.MultipartFile(
+          'file',
+          File(filepath).readAsBytes().asStream(),
+          File(filepath).lengthSync(),
+          filename: ss,
+        ),
+      );
+
+      var response = await request.send();
+      var responseString = await response.stream.bytesToString();
+      if (response.statusCode == 200) {
+        return 'ok';
+      }
+    } catch (err) {
+      print('$err');
+    }
+    return 'something goes wrong';
+  }
 }
