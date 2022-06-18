@@ -27,7 +27,24 @@ class _StatisticsState extends State<Statistics> {
   }
 
 // Fetching data from backend for bar chart
-  void getData() async {}
+  void getData() async {
+    var response = await transaction.viewTransactions("auth/totalEarning/");
+
+    List<TransactionOrigin> transactions = [];
+
+    for (var u in response) {
+      TransactionOrigin trans = TransactionOrigin(
+        u["grand_total"],
+        u["_id"],
+      );
+      transactions.add(trans);
+    }
+
+    setState(() {
+      barData = transactions;
+      loading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
