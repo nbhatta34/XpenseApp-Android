@@ -595,4 +595,23 @@ class HttpConnectUser {
     }
     return 'something goes wrong';
   }
+  // +++++++++++++++++++++++++++++++ Delete Stock Category Details +++++++++++++++++++++++++++++++++++++++++++++
+
+  void deleteStockCategory(String categoryId) async {
+    print(categoryId);
+    String tok = 'Bearer $token';
+
+    final response = await http.delete(
+        Uri.parse(baseurl + 'auth/deleteStockCategory/${categoryId}'),
+        headers: {'Authorization': tok});
+    if (response.statusCode == 200) {
+      Fluttertoast.showToast(
+        msg: "Category Deleted",
+        backgroundColor: Colors.green,
+        fontSize: 16,
+        gravity: ToastGravity.TOP,
+      );
+    } else {}
+  }
+// -------------------------------------------------------------------------------------------------------
 }

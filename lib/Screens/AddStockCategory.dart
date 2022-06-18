@@ -17,6 +17,7 @@ class AddStockCategory extends StatefulWidget {
 class _AddStockCategoryState extends State<AddStockCategory> {
   @override
   void initState() {
+    fetchdataCategory();
     _image = null;
     super.initState();
   }
@@ -50,6 +51,32 @@ class _AddStockCategoryState extends State<AddStockCategory> {
   }
 
   HttpConnectUser cat = HttpConnectUser();
+
+  fetchdataCategory() async {
+    try {
+      var response = await cat.viewStockCategory("auth/addStockCategory/");
+
+      print(response);
+
+      List<CategoryInfoFetcher> categoryNameList = [];
+
+      for (var u in response["data"]) {
+        CategoryInfoFetcher client = CategoryInfoFetcher(
+          u["categoryName"],
+          u["picture"],
+          u["_id"],
+          u["userId"],
+        );
+
+        categoryNameList.add(client);
+      }
+      // print(clientNameList[0].clientId);
+
+      return categoryNameList;
+    } catch (err) {
+      print(err);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -280,9 +307,220 @@ class _AddStockCategoryState extends State<AddStockCategory> {
                 ),
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Recently Added Categories",
+                    style: GoogleFonts.poppins(
+                        fontSize: 18, fontWeight: FontWeight.w500),
+                  )),
+            ),
+            Expanded(
+              child: FutureBuilder(
+                future: fetchdataCategory(),
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (snapshot.data == null) {
+                    return SpinKitWave(
+                      color: Colors.black54,
+                    );
+                  } else {
+                    if (snapshot.data?.length == 0) {
+                      return Container(
+                        child: Center(
+                          child: Text(
+                            "No Category Data To Show",
+                            style: GoogleFonts.poppins(
+                                fontSize: 23,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black54),
+                          ),
+                        ),
+                      );
+                    } else {
+                      final List<CategoryInfoFetcher> transactionData =
+                          List.generate(
+                        snapshot.data.length,
+                        (index) => CategoryInfoFetcher(
+                          '${snapshot.data?[index].categoryName}',
+                          '${snapshot.data?[index].picture}',
+                          '${snapshot.data?[index].categoryId}',
+                          '${snapshot.data?[index].userId}',
+                        ),
+                      );
+                      return ListView.builder(
+                        itemCount: transactionData.length,
+                        itemBuilder: (context, index) {
+                          return Card(
+                            child: Row(
+                              children: [
+                                InkWell(
+                                  onTap: () {},
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 10),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Container(
+                                              width: (MediaQuery.of(context)
+                                                          .size
+                                                          .width -
+                                                      60) *
+                                                  0.65,
+                                              child: Row(
+                                                children: [
+                                                  Container(
+                                                    width: 50,
+                                                    height: 50,
+                                                    decoration: BoxDecoration(
+                                                      border: Border.all(
+                                                          width: 1,
+                                                          color: Colors.white),
+                                                      shape: BoxShape.circle,
+                                                      image: DecorationImage(
+                                                        fit: BoxFit.cover,
+                                                        image: NetworkImage(
+                                                            "http://10.0.2.2:3000/uploads/${snapshot.data?[snapshot.data.length - (index + 1)].categoryName}_${snapshot.data?[snapshot.data.length - (index + 1)].userId}.png"),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: 15),
+                                                  Container(
+                                                    width:
+                                                        (MediaQuery.of(context)
+                                                                    .size
+                                                                    .width -
+                                                                110) *
+                                                            0.5,
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          "${snapshot.data?[snapshot.data.length - (index + 1)].categoryName}",
+                                                          style: TextStyle(
+                                                              fontSize: 15,
+                                                              color:
+                                                                  Colors.black,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500),
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                            Container(
+                                              width: (MediaQuery.of(context)
+                                                          .size
+                                                          .width -
+                                                      0) /
+                                                  2.82,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  IconButton(
+                                                    onPressed: () {
+                                                      showDialog<String>(
+                                                        context: context,
+                                                        builder: (BuildContext
+                                                                context) =>
+                                                            AlertDialog(
+                                                          title: const Text(
+                                                              'Are you sure you want to delete?'),
+                                                          content: const Text(
+                                                              'Category will be deleted permanently.'),
+                                                          actions: <Widget>[
+                                                            TextButton(
+                                                              onPressed: () =>
+                                                                  Navigator.pop(
+                                                                      context,
+                                                                      'Cancel'),
+                                                              child: const Text(
+                                                                  'Cancel'),
+                                                            ),
+                                                            TextButton(
+                                                              onPressed: () {
+                                                                HttpConnectUser().deleteStockCategory(snapshot
+                                                                    .data?[snapshot
+                                                                            .data
+                                                                            .length -
+                                                                        (index +
+                                                                            1)]
+                                                                    .categoryId);
+                                                                Navigator
+                                                                    .pushReplacement(
+                                                                        context,
+                                                                        MaterialPageRoute(
+                                                                          builder: (context) =>
+                                                                              AddStockCategory(),
+                                                                        ));
+                                                                // Navigator.pop(
+                                                                //     context, 'OK');
+                                                                // child:
+                                                              },
+                                                              child: const Text(
+                                                                  'OK'),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      );
+                                                    },
+                                                    icon: Icon(
+                                                      Icons.delete_outline,
+                                                      color: Colors.red,
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    }
+                  }
+                },
+              ),
+            )
           ],
         ),
       ),
     ));
   }
+}
+
+class CategoryInfoFetcher {
+  final String? categoryName;
+  final String? picture;
+  final String? categoryId;
+  final String? userId;
+
+  CategoryInfoFetcher(
+    this.categoryName,
+    this.picture,
+    this.categoryId,
+    this.userId,
+  );
 }
