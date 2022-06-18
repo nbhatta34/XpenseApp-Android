@@ -28,7 +28,25 @@ class _StatisticsState extends State<Statistics> {
   }
 
   // Fetching data for pie chart from backend
-  void getDataPie() async {}
+  void getDataPie() async {
+    var response =
+        await transaction.viewTransactions("auth/totalEarningInCategories/");
+
+    List<PieChartModel> pieData = [];
+
+    for (var u in response) {
+      PieChartModel trans = PieChartModel(
+        u["grand_total"],
+        u["_id"],
+      );
+      pieData.add(trans);
+    }
+
+    setState(() {
+      pieChartData = pieData;
+      loading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
