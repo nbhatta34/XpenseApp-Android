@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:xpense_android/model/CategoryModel.dart';
 import 'package:xpense_android/model/ClientModel.dart';
 import 'package:xpense_android/model/StockModel.dart';
+import 'package:xpense_android/model/SupplierModel.dart';
 import 'package:xpense_android/model/TransactionModel.dart';
 import 'package:xpense_android/model/UserModel.dart';
 import 'package:xpense_android/model/UserProfile.dart';
@@ -499,6 +500,63 @@ class HttpConnectUser {
     if (response.statusCode == 200) {
       Fluttertoast.showToast(
         msg: "Category Deleted",
+        backgroundColor: Colors.green,
+        fontSize: 16,
+        gravity: ToastGravity.TOP,
+      );
+    } else {}
+  }
+// -------------------------------------------------------------------------------------------------------
+//  ++++++++++++++++++++++++++++++++ Add Supplier Information  ++++++++++++++++++++++++++++++++++++++++
+
+  Future<bool> addSupplierInformation(Suppliers supplier) async {
+    String tok = 'Bearer $token';
+    Map<String, dynamic> supplierMap = {
+      "supplierName": supplier.supplierName,
+      "mobile": supplier.mobile,
+      "address": supplier.address,
+      "email": supplier.email,
+    };
+
+    final response = await http.post(
+        Uri.parse(baseurl + 'auth/addSupplierInformation/'),
+        body: supplierMap,
+        headers: {
+          'Authorization': tok,
+        });
+    if (response.statusCode == 200) {
+      var usrRes = ResponseUser.fromJson(jsonDecode(response.body));
+      return usrRes.success!;
+    } else {
+      return false;
+    }
+  }
+  //--------------------------------------------------------------------------------------------
+  // ++++++++++++++++++++++++++++++++ Get All Supplier Data ++++++++++++++++++++++++++++++++++++++++
+
+  Future viewSupplierInformation(String url) async {
+    String tok = 'Bearer $token';
+    var response = await http.get(Uri.parse(baseurl + url), headers: {
+      'Authorization': tok,
+    });
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed To Load Supplier Information');
+    }
+  }
+// -----------------------------------------------------------------------------------------------------
+// +++++++++++++++++++++++++++++++ Delete Supplier Details +++++++++++++++++++++++++++++++++++++++++++++
+
+  void deleteSupplierInformation(String supplierId) async {
+    String tok = 'Bearer $token';
+
+    final response = await http.delete(
+        Uri.parse(baseurl + 'auth/deleteSupplierInformation/${supplierId}'),
+        headers: {'Authorization': tok});
+    if (response.statusCode == 200) {
+      Fluttertoast.showToast(
+        msg: "Supplier Information Deleted",
         backgroundColor: Colors.green,
         fontSize: 16,
         gravity: ToastGravity.TOP,
