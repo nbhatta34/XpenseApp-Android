@@ -5,17 +5,22 @@ import 'package:xpense_android/Screens/HomeScreen.dart';
 import 'package:xpense_android/Screens/Stocks.dart';
 import 'package:xpense_android/http/HttpUser.dart';
 import 'package:xpense_android/model/StockModel.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
+
 class AddStock extends StatefulWidget {
   const AddStock({Key? key}) : super(key: key);
   @override
   State<AddStock> createState() => _AddStockState();
 }
+
 class _AddStockState extends State<AddStock> {
   TextEditingController stockController = TextEditingController();
   TextEditingController quantityController = TextEditingController();
   TextEditingController priceController = TextEditingController();
   TextEditingController totalController = TextEditingController();
   TextEditingController supplierController = TextEditingController();
+  final TextEditingController _typeAheadController = TextEditingController();
+
   final _formKey = GlobalKey<FormState>();
   String stockName = "";
   String quantity = "";
@@ -25,6 +30,31 @@ class _AddStockState extends State<AddStock> {
     var res = HttpConnectUser().addStock(s);
     return res;
   }
+
+  HttpConnectUser suppliers = HttpConnectUser();
+
+  fetchdataSupplier() async {
+    try {
+      var response = await suppliers
+          .viewSupplierInformation("auth/addSupplierInformation/");
+
+      List supplierList = [];
+
+      for (var u in response["data"]) {
+        supplierList.add(u["supplierName"]);
+      }
+      setState(() {
+        supplierNameList = supplierList;
+      });
+
+      return supplierList;
+    } catch (err) {
+      print(err);
+    }
+  }
+
+  List supplierNameList = [];
+
   List<String> categories = [
     "Print",
     "Repair",
@@ -274,36 +304,50 @@ class _AddStockState extends State<AddStock> {
                 Padding(
                   padding:
                       const EdgeInsets.symmetric(vertical: 8.0, horizontal: 28),
-                  child: TextFormField(
-                    textInputAction: TextInputAction.done,
+                  child: TypeAheadFormField(
+                    suggestionsCallback: (String pattern) =>
+                        supplierNameList.where((element) => element
+                            .toLowerCase()
+                            .contains(pattern.toLowerCase())),
+                    itemBuilder: (context, item) {
+                      return ListTile(
+                        title: Text("${item}"),
+                      );
+                    },
+                    onSuggestionSelected: (suggestion) {
+                      this._typeAheadController.text = suggestion as String;
+                    },
+                    textFieldConfiguration: TextFieldConfiguration(
+                      controller: this._typeAheadController,
+                      textInputAction: TextInputAction.done,
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.symmetric(vertical: 10),
+                        filled: true,
+                        fillColor: Theme.of(context).cardColor,
+                        labelText: "Supplier Name",
+                        labelStyle: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xff3099EC),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.person,
+                          color: Color(0xff3099EC),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Color.fromARGB(111, 161, 161, 161)),
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Color.fromARGB(111, 161, 161, 161)),
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                    ),
                     onSaved: (value) {
                       supplierName = value!;
                     },
-                    controller: supplierController,
-                    decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(vertical: 10),
-                      filled: true,
-                      fillColor: Theme.of(context).cardColor,
-                      labelText: "Supplier Name",
-                      labelStyle: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xff3099EC),
-                      ),
-                      prefixIcon: Icon(
-                        Icons.person,
-                        color: Color(0xff3099EC),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Color.fromARGB(111, 161, 161, 161)),
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Color.fromARGB(111, 161, 161, 161)),
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
                   ),
                 ),
                 Padding(
