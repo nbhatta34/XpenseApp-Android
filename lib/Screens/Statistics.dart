@@ -8,6 +8,8 @@ class Statistics extends StatefulWidget {
 }
 
 class _StatisticsState extends State<Statistics> {
+  bool loading = true;
+
   @override
   void initState() {
     super.initState();

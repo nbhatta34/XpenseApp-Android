@@ -507,7 +507,7 @@ class HttpConnectUser {
     } else {}
   }
 // -------------------------------------------------------------------------------------------------------
-//  ++++++++++++++++++++++++++++++++ Add Supplier Information  ++++++++++++++++++++++++++++++++++++++++
+// ++++++++++++++++++++++++++++++++ Add Supplier Information  ++++++++++++++++++++++++++++++++++++++++
 
   Future<bool> addSupplierInformation(Suppliers supplier) async {
     String tok = 'Bearer $token';
@@ -524,6 +524,7 @@ class HttpConnectUser {
         headers: {
           'Authorization': tok,
         });
+
     if (response.statusCode == 200) {
       var usrRes = ResponseUser.fromJson(jsonDecode(response.body));
       return usrRes.success!;
@@ -531,10 +532,61 @@ class HttpConnectUser {
       return false;
     }
   }
-  //--------------------------------------------------------------------------------------------
   // ++++++++++++++++++++++++++++++++ Get All Supplier Data ++++++++++++++++++++++++++++++++++++++++
 
   Future viewSupplierInformation(String url) async {
+    String tok = 'Bearer $token';
+
+    var response = await http.get(Uri.parse(baseurl + url), headers: {
+      'Authorization': tok,
+    });
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed To Load Supplier Information');
+    }
+  }
+  // ++++++++++++++++++++++++++++++++ Add Stock Category  ++++++++++++++++++++++++++++++++++++++++
+
+  Future<bool> addStockCategory(Category category, File? file) async {
+    print("file");
+    String s = '';
+    String tok = 'Bearer $token';
+    Map<String, dynamic> categoryMap = {
+      "categoryName": category.categoryName,
+    };
+
+    final response = await http.post(
+        Uri.parse(baseurl + 'auth/addStockCategory/'),
+        body: categoryMap,
+        headers: {
+          'Authorization': tok,
+        });
+    var jsonData = jsonDecode(response.body);
+    if (jsonData["status"] == "200") {
+      print(response.body);
+      var categoryId = jsonData["stockCategory"]["_id"];
+      var categoryName = jsonData["stockCategory"]["categoryName"];
+      print(categoryId);
+      if (file != null) {
+        print("image file null xaina");
+        print(file);
+        var s = await uploadThumbnail(file.path, categoryId, categoryName);
+      }
+      if (s == "ok") {
+        Fluttertoast.showToast(msg: "Data uploaded successfully");
+      } else {}
+      return true;
+    } else {
+      return false;
+    }
+  }
+  //--------------------------------------------------------------------------------------------
+
+  // ++++++++++++++++++++++++++++++++ Get Stock Category Data ++++++++++++++++++++++++++++++++++++++++
+
+  Future viewStockCategory(String url) async {
     String tok = 'Bearer $token';
     var response = await http.get(Uri.parse(baseurl + url), headers: {
       'Authorization': tok,
@@ -554,9 +606,71 @@ class HttpConnectUser {
     final response = await http.delete(
         Uri.parse(baseurl + 'auth/deleteSupplierInformation/${supplierId}'),
         headers: {'Authorization': tok});
+
     if (response.statusCode == 200) {
       Fluttertoast.showToast(
         msg: "Supplier Information Deleted",
+        backgroundColor: Colors.green,
+        fontSize: 16,
+        gravity: ToastGravity.TOP,
+      );
+    } else {}
+  }
+
+// -------------------------------------------------------------------------------------------------------
+  // +++++++++++++++++++++++++++++++ UPLOAD STOCK CATEGORY THUMBNAIL IMAGE ++++++++++++++++++++++++++++++++++++++++++
+
+  Future<String> uploadStockThumbnail(
+      String filepath, String categoryId, String categoryName) async {
+    print("Upload Thumbnail function ma pugyo");
+    print(filepath);
+    print(categoryId);
+    try {
+      String tok = 'Bearer $token';
+      String route = 'auth/' + categoryId + '/' + categoryName + '/photo';
+      print(route);
+      String url = baseurl + route;
+      var request = http.MultipartRequest('POST', Uri.parse(url));
+      //using the token in the headers
+      request.headers.addAll({
+        'Authorization': tok,
+      });
+      // need a filename
+
+      var ss = filepath.split('/').last;
+      print(ss);
+      // adding the file in the request
+      request.files.add(
+        http.MultipartFile(
+          'file',
+          File(filepath).readAsBytes().asStream(),
+          File(filepath).lengthSync(),
+          filename: ss,
+        ),
+      );
+
+      var response = await request.send();
+      var responseString = await response.stream.bytesToString();
+      if (response.statusCode == 200) {
+        return 'ok';
+      }
+    } catch (err) {
+      print('$err');
+    }
+    return 'something goes wrong';
+  }
+  // +++++++++++++++++++++++++++++++ Delete Stock Category Details +++++++++++++++++++++++++++++++++++++++++++++
+
+  void deleteStockCategory(String categoryId) async {
+    print(categoryId);
+    String tok = 'Bearer $token';
+
+    final response = await http.delete(
+        Uri.parse(baseurl + 'auth/deleteStockCategory/${categoryId}'),
+        headers: {'Authorization': tok});
+    if (response.statusCode == 200) {
+      Fluttertoast.showToast(
+        msg: "Category Deleted",
         backgroundColor: Colors.green,
         fontSize: 16,
         gravity: ToastGravity.TOP,
