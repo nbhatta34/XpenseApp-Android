@@ -34,6 +34,8 @@ class _DashBoardState extends State<DashBoard>
   @override
   void initState() {
     // fetchdata();
+    visibility = [true, true, true, true, true, true];
+    getCardsData();
     _animationController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 300))
           ..addListener(() {
@@ -55,6 +57,16 @@ class _DashBoardState extends State<DashBoard>
 
     super.initState();
   }
+
+  // Customizable Dashboard Cards
+
+  bool hi = false;
+
+  bool loading = true;
+
+  late List<bool> visibility;
+
+  // ---------------------------------------
 
   @override
   void dispose() {
@@ -132,6 +144,32 @@ class _DashBoardState extends State<DashBoard>
     isOpened = !isOpened;
   }
 
+  // Fetching data for Statistics Cards from backend
+  List<StatisticsCardModel> cardsQuantityData = [];
+
+  void getCardsData() async {
+    var response =
+        await transaction.viewTransactions("auth/totalQuantityOfCategories/");
+
+    List<StatisticsCardModel> cardsData = [];
+
+    for (var u in response) {
+      StatisticsCardModel cards = StatisticsCardModel(
+        u["quantity"],
+        u["_id"],
+      );
+      cardsData.add(cards);
+    }
+
+    setState(() {
+      cardsQuantityData = cardsData;
+      // print(cardsQuantityData.length);
+      loading = false;
+    });
+  }
+
+  // -----------------------------------------------------
+
   fetchdata() async {
     try {
       var response = await transaction.viewTransactions("auth/addTransaction/");
@@ -191,6 +229,32 @@ class _DashBoardState extends State<DashBoard>
         ],
       ),
       body: getBody(),
+    );
+  }
+
+  Widget statisticsCards(String categoryName, int quantity) {
+    return Container(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            "${quantity}",
+            style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w600, color: Colors.white, fontSize: 26),
+          ),
+          Text(
+            "${categoryName}",
+            style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w500, color: Colors.white, fontSize: 16),
+          ),
+        ],
+      ),
+      // width: MediaQuery.of(context).size.width / 2 - 20,
+      // height: 60,
+      decoration: BoxDecoration(
+        color: Color.fromARGB(255, 11, 59, 65),
+        borderRadius: BorderRadius.circular(15),
+      ),
     );
   }
 
@@ -277,153 +341,134 @@ class _DashBoardState extends State<DashBoard>
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                "Today's Statistics",
-                style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Color.fromARGB(255, 95, 95, 95)),
+              Padding(
+                padding: const EdgeInsets.only(left: 15, right: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Current Month's Statistics",
+                      style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: Theme.of(context).canvasColor,
+                          fontWeight: FontWeight.w600),
+                    ),
+                    // Icon(Icons.search)
+                  ],
+                ),
               ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4.0),
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: loading == true
+                      ? Center(
+                          child: SpinKitWave(
+                            color: Theme.of(context).highlightColor,
+                          ),
+                        )
+                      : cardsQuantityData.length == 0
+                          ? Container(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 18.0),
+                                    child: Text(
+                                      "No Category Stats To Show",
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 23,
+                                        color: Theme.of(context).highlightColor,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 18.0),
+                                    child: Text(
+                                      "Please Add Some Categories.",
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 16,
+                                        color: Colors.grey,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : GridView.builder(
+                              shrinkWrap: true,
+                              primary: false,
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                childAspectRatio: 1.9,
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                              ),
+                              itemCount: cardsQuantityData.length,
+                              itemBuilder: (context, index) {
+                                return Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: Visibility(
+                                    visible: visibility[index],
+                                    // maintainAnimation: true,
+                                    // maintainSize: true,
+                                    // maintainState: true,
+                                    child: statisticsCards(
+                                        "${cardsQuantityData[index].category}",
+                                        cardsQuantityData[index].quantity),
+                                  ),
+                                );
+                              },
+                            ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: ExpansionTile(
+                  onExpansionChanged: ((value) => visibility =
+                      List<bool>.filled(cardsQuantityData.length, true)),
+                  title: Text(
+                    "Select Categories To View On Dashboard",
+                    style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: Theme.of(context).canvasColor,
+                        fontWeight: FontWeight.w500),
+                  ),
+                  children: [
+                    cardsQuantityData.length == 0
+                        ? Text("")
+                        : ListView.builder(
+                            primary: false,
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            scrollDirection: Axis.vertical,
+                            itemCount: cardsQuantityData.length,
+                            itemBuilder: (context, index) {
+                              return CheckboxListTile(
+                                activeColor: Colors.blue,
+                                title: Text(
+                                    "${cardsQuantityData[index].category}"),
+                                value: visibility[index],
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
+                                onChanged: (value) {
+                                  setState(() {
+                                    visibility[index] = !visibility[index];
+                                  });
+                                },
+                              );
+                            },
+                          ),
+                  ],
+                ),
+              ),
+
               // Icon(Icons.search)
-            ],
-          ),
-        ),
-        Container(
-          height: 200,
-          width: double.infinity,
-          decoration: BoxDecoration(),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  InkWell(
-                    onTap: () {},
-                    child: Container(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "38",
-                            style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                                fontSize: 26),
-                          ),
-                          Text(
-                            "Products Sold",
-                            style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white,
-                                fontSize: 16),
-                          ),
-                        ],
-                      ),
-                      width: MediaQuery.of(context).size.width / 2 - 20,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: Color.fromARGB(255, 11, 59, 73),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {},
-                    child: Container(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "180",
-                            style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                                fontSize: 26),
-                          ),
-                          Text(
-                            "Prints",
-                            style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white,
-                                fontSize: 16),
-                          ),
-                        ],
-                      ),
-                      width: MediaQuery.of(context).size.width / 2 - 20,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: Color.fromARGB(255, 11, 59, 73),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  InkWell(
-                    onTap: () {},
-                    child: Container(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "3",
-                            style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                                fontSize: 26),
-                          ),
-                          Text(
-                            "Repairs",
-                            style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white,
-                                fontSize: 16),
-                          ),
-                        ],
-                      ),
-                      width: MediaQuery.of(context).size.width / 2 - 20,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: Color.fromARGB(255, 11, 59, 73),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () {},
-                    child: Container(
-                      width: MediaQuery.of(context).size.width / 2 - 20,
-                      height: 80,
-                      decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 11, 59, 73),
-                          borderRadius: BorderRadius.circular(15)),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "8",
-                            style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                                fontSize: 26),
-                          ),
-                          Text(
-                            "Others",
-                            style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white,
-                                fontSize: 16),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
             ],
           ),
         ),
@@ -712,4 +757,15 @@ class Transactions {
 
   Transactions(this.itemName, this.quantity, this.unitPrice, this.category,
       this.clientName, this.transactionId);
+}
+
+// Statistics Cards Model
+class StatisticsCardModel {
+  final int quantity;
+  final String category;
+
+  StatisticsCardModel(
+    this.quantity,
+    this.category,
+  );
 }
