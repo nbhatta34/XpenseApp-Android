@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:xpense_android/model/CategoryModel.dart';
 import 'package:xpense_android/model/ClientModel.dart';
+import 'package:xpense_android/model/SearchClientModel.dart';
 import 'package:xpense_android/model/StockModel.dart';
 import 'package:xpense_android/model/SupplierModel.dart';
 import 'package:xpense_android/model/TransactionModel.dart';
@@ -678,4 +679,33 @@ class HttpConnectUser {
     } else {}
   }
 // -------------------------------------------------------------------------------------------------------
+
+  // ++++++++++++++++++++++++++++++     SEARCH ANY CLIENT      ++++++++++++++++++++++++++++++++++++++++++
+
+  Future searchClientInfo(String query) async {
+    String tok = 'Bearer $token';
+    final url = Uri.parse(baseurl + "auth/searchClientInfo/");
+    final response = await http.get(url, headers: {'Authorization': tok});
+
+    if (response.statusCode == 200) {
+      final List clients = json.decode(response.body);
+
+      return clients.map((json) => SearchClientModel.fromJson(json)).where(
+        (user) {
+          final clientName = user.clientName.toLowerCase();
+          final mobile = user.mobile.toLowerCase();
+          final address = user.address.toLowerCase();
+          final email = user.email.toLowerCase();
+          final searchLower = query.toLowerCase();
+
+          return clientName.contains(searchLower) ||
+              mobile.contains(searchLower) ||
+              address.contains(searchLower) ||
+              email.contains(searchLower);
+        },
+      ).toList();
+    } else {
+      throw Exception();
+    }
+  }
 }
