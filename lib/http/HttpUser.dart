@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:xpense_android/model/CategoryModel.dart';
 import 'package:xpense_android/model/ClientModel.dart';
+import 'package:xpense_android/model/SearchTransactions.dart';
 import 'package:xpense_android/model/StockModel.dart';
 import 'package:xpense_android/model/SupplierModel.dart';
 import 'package:xpense_android/model/TransactionModel.dart';
@@ -678,4 +679,27 @@ class HttpConnectUser {
     } else {}
   }
 // -------------------------------------------------------------------------------------------------------
+// ++++++++++++++++++++++++++++++     SEARCH ANY TRANSACTIONS      ++++++++++++++++++++++++++++++++++++++++++
+
+  Future searchUSer(String query) async {
+    String tok = 'Bearer $token';
+    final url = Uri.parse(baseurl + "auth/searchTransaction/");
+    final response = await http.get(url, headers: {'Authorization': tok});
+
+    if (response.statusCode == 200) {
+      final List users = json.decode(response.body);
+
+      return users.map((json) => SearchTransactions.fromJson(json)).where(
+        (user) {
+          final fnameLower = user.clientName.toLowerCase();
+          final searchLower = query.toLowerCase();
+
+          return fnameLower.contains(searchLower);
+        },
+      ).toList();
+    } else {
+      throw Exception();
+    }
+  }
+
 }

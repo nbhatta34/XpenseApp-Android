@@ -5,6 +5,7 @@ import 'package:xpense_android/Screens/AddClientInformation.dart';
 import 'package:xpense_android/Screens/AddEarning.dart';
 import 'package:xpense_android/Screens/EditTransaction.dart';
 import 'package:xpense_android/Screens/HomeScreen.dart';
+import 'package:xpense_android/Screens/SearchTransactions.dart';
 import 'package:xpense_android/http/HttpUser.dart';
 import 'package:xpense_android/response/GetTransactionResponse.dart';
 import 'package:jiffy/jiffy.dart';
@@ -160,6 +161,25 @@ class _DashBoardState extends State<DashBoard>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "Dashboard",
+          style: GoogleFonts.poppins(fontSize: 19, fontWeight: FontWeight.w500),
+        ),
+        toolbarHeight: 45,
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SearchTransactions(),
+                  ),
+                );
+              },
+              icon: Icon(Icons.search))
+        ],
+      ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
