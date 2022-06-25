@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:xpense_android/Screens/HomeScreen.dart';
+import 'package:xpense_android/Screens/SearchClientInfo.dart';
 import 'package:xpense_android/http/HttpUser.dart';
 import 'package:xpense_android/model/ClientModel.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -59,7 +60,21 @@ class _AddClientInfoState extends State<AddClientInfo> {
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
-      appBar: AppBar(title: Text("Add Client Information")),
+      appBar: AppBar(
+        title: Text("Add Client Information"),
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SearchClientInfo(),
+                    ));
+                // showSearch(context: context, delegate: CustomSearchDelegate());
+              },
+              icon: Icon(Icons.search))
+        ],
+      ),
       body: Form(
         key: _formKey,
         child: Column(
