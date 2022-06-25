@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:xpense_android/Screens/AddStockCategory.dart';
 import 'package:xpense_android/Screens/AddStocks.dart';
 import 'package:xpense_android/Screens/AddSupplierInformation.dart';
 import 'package:xpense_android/Screens/EditStock.dart';

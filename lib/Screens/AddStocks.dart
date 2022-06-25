@@ -22,10 +22,12 @@ class _AddStockState extends State<AddStock> {
   final TextEditingController _typeAheadController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
+
   String stockName = "";
   String quantity = "";
   String unitPrice = "";
   String supplierName = "";
+
   Future<bool> addBuyings(Stock s) {
     var res = HttpConnectUser().addStock(s);
     return res;
@@ -48,23 +50,40 @@ class _AddStockState extends State<AddStock> {
       });
 
       return supplierList;
+       } catch (err) {
+
+      print(err);
+
+  }
+    }
+  fetchdata() async {
+    try {
+      var response =
+          await suppliers.viewStockCategory("auth/addStockCategory/");
+
+      List categoryList = [];
+
+      for (var u in response["data"]) {
+        categoryList.add(u["categoryName"]);
+      }
+      setState(() {
+        categoryNameList = categoryList;
+        categoryNameList.add("Select Category");
+      });
+
+      return categoryList;
     } catch (err) {
       print(err);
     }
   }
 
-  List supplierNameList = [];
-
-  List<String> categories = [
-    "Print",
-    "Repair",
-    "Binding",
-    "Product",
-    "Other",
-  ];
-  String category = "Print";
+  String category = "Select Category";
   late double total = 0;
   late double sub_total;
+
+  List categoryNameList = [];
+  List supplierNameList = [];
+
   @override
   Widget build(BuildContext context) {
     final addButton = SizedBox(
@@ -285,7 +304,7 @@ class _AddStockState extends State<AddStock> {
                         ),
                       ),
                       value: category,
-                      items: categories
+                      items: categoryNameList
                           .map(
                             (e) => DropdownMenuItem<String>(
                               value: e,
