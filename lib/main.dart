@@ -3,9 +3,10 @@ import 'package:xpense_android/Screens/Dashboard.dart';
 import 'package:xpense_android/Screens/LoginScreen.dart';
 import 'package:xpense_android/Screens/HomeScreen.dart';
 import 'package:xpense_android/Screens/RegisterScreen.dart';
-
+import 'package:hive_flutter/hive_flutter.dart';
 
 void main() async {
+  await Hive.initFlutter();
   runApp(const MyApp());
 }
 

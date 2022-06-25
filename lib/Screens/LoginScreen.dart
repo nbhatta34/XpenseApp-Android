@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:xpense_android/Screens/ForgotPassword.dart';
+import 'package:xpense_android/Screens/HomeScreen.dart';
 import 'package:xpense_android/http/HttpUser.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -16,6 +19,28 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
+    createOpenBox();
+  }
+
+  late Box hiveBox;
+  void createOpenBox() async {
+    hiveBox = await Hive.openBox("rememberMe");
+    getRememberMe();
+  }
+
+  void getRememberMe() async {
+    if (hiveBox.get("email") != null) {
+      emailController.text = hiveBox.get("email");
+      isChecked = true;
+      setState(() {});
+      print(email);
+    }
+    if (hiveBox.get("password") != null) {
+      passwordController.text = hiveBox.get("password");
+      isChecked = true;
+      setState(() {});
+      print(password);
+    }
   }
 
   bool obscureText = true;
@@ -155,6 +180,19 @@ class _LoginScreenState extends State<LoginScreen> {
           _formKey.currentState!.save();
           var res = await loginPost(email, password);
           if (res) {
+            if (isChecked) {
+              hiveBox.put("email", email);
+              hiveBox.put("password", password);
+            } else {
+              hiveBox.delete("email");
+              hiveBox.delete("password");
+            }
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomeScreen(),
+              ),
+            );
             Fluttertoast.showToast(
                 msg: "Login Successful",
                 backgroundColor: Colors.greenAccent,
