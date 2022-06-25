@@ -8,6 +8,7 @@ import 'package:xpense_android/Screens/HomeScreen.dart';
 import 'package:xpense_android/http/HttpUser.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 class Stocks extends StatefulWidget {
   const Stocks({Key? key}) : super(key: key);
@@ -18,6 +19,10 @@ class Stocks extends StatefulWidget {
 
 class _StocksState extends State<Stocks> with SingleTickerProviderStateMixin {
   HttpConnectUser transaction = HttpConnectUser();
+  late TooltipBehavior _tooltipBehavior;
+  bool loading = true;
+
+  List<RadialBarModel> radialBarData = [];
 
   bool isOpened = false;
   late AnimationController _animationController;
@@ -29,6 +34,8 @@ class _StocksState extends State<Stocks> with SingleTickerProviderStateMixin {
 
   @override
   void initState() {
+    _tooltipBehavior = TooltipBehavior(enable: true);
+    getDataRadialBar();
     fetchdata();
     _animationController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 300))
@@ -55,6 +62,29 @@ class _StocksState extends State<Stocks> with SingleTickerProviderStateMixin {
   void dispose() {
     _animationController.dispose();
     super.dispose();
+  }
+
+  // Fetching data from backend for radial bar chart
+  void getDataRadialBar() async {
+    var response = await transaction
+        .viewTransactions("auth/totalQuantityOfStockCategories/");
+
+    List<RadialBarModel> radial = [];
+
+    for (var u in response) {
+      RadialBarModel trans = RadialBarModel(
+        u["quantity"],
+        u["_id"],
+      );
+      radial.add(trans);
+    }
+
+    // print(radial[1].category);
+
+    setState(() {
+      radialBarData = radial;
+      loading = false;
+    });
   }
 
   Widget buttonAdd() {
@@ -184,277 +214,325 @@ class _StocksState extends State<Stocks> with SingleTickerProviderStateMixin {
             buttonToggle()
           ],
         ),
-        body: getBody(),
-      ),
-    );
-  }
-
-  Widget getBody() {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 15, right: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Text(
-                  "Recently Added Stocks",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: Color.fromARGB(255, 95, 95, 95),
-                  ),
-                ),
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                "Stock Category vs Quantity",
+                style: GoogleFonts.poppins(
+                    fontSize: 23, fontWeight: FontWeight.w500),
               ),
-              // Icon(Icons.search)
-            ],
-          ),
-        ),
-        Expanded(
-          child: FutureBuilder(
-            future: fetchdata(),
-            builder: (BuildContext context, AsyncSnapshot snapshot) {
-              if (snapshot.data == null) {
-                return SpinKitWave(
-                  color: Colors.black54,
-                );
-              } else {
-                if (snapshot.data?.length == 0) {
-                  return Container(
+            ),
+            radialBarData.length <= 0
+                ? Container(
                     child: Center(
                       child: Text(
-                        "No Stocks To Show",
+                        "No Data To Show Radial Chart",
                         style: GoogleFonts.poppins(
-                            fontSize: 23,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black54),
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).highlightColor,
+                        ),
                       ),
                     ),
-                  );
-                } else {
-                  final List<StockModel> stockData = List.generate(
-                    snapshot.data.length,
-                    (index) => StockModel(
-                      '${snapshot.data?[index].stockName}',
-                      '${snapshot.data?[index].quantity}',
-                      '${snapshot.data?[index].unitPrice}',
-                      '${snapshot.data?[index].category}',
-                      '${snapshot.data?[index].supplierName}',
-                      '${snapshot.data?[index].stockId}',
+                  )
+                : SfCircularChart(
+                    legend: Legend(
+                      isVisible: true,
+                      overflowMode: LegendItemOverflowMode.wrap,
                     ),
-                  );
-                  return ListView.builder(
-                    itemCount: stockData.length,
-                    itemBuilder: (context, index) {
-                      return Card(
-                        child: Row(
-                          children: [
-                            InkWell(
-                              onTap: () {},
-                              onLongPress: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => EditStock(
-                                        index: stockData.length - (index + 1),
-                                        stocks: stockData),
-                                  ),
-                                );
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 8.0, horizontal: 10),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Container(
-                                          width: (MediaQuery.of(context)
-                                                      .size
-                                                      .width -
-                                                  60) *
-                                              0.65,
-                                          child: Row(
-                                            children: [
-                                              Container(
-                                                width: 50,
-                                                height: 50,
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  color: Colors.grey
-                                                      .withOpacity(0.1),
-                                                ),
-                                                child: Center(
-                                                  child: Image.asset(
-                                                    "assets/images/${snapshot.data?[snapshot.data.length - (index + 1)].category.toLowerCase()}.png",
-                                                    width: 50,
-                                                    height: 50,
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(width: 15),
-                                              Container(
-                                                width: (MediaQuery.of(context)
-                                                            .size
-                                                            .width -
-                                                        110) *
-                                                    0.5,
-                                                child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      "${snapshot.data?[snapshot.data.length - (index + 1)].stockName} x ${snapshot.data?[snapshot.data.length - (index + 1)].quantity}",
-                                                      style: TextStyle(
-                                                          fontSize: 15,
-                                                          color: Colors.black,
-                                                          fontWeight:
-                                                              FontWeight.w500),
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                    SizedBox(height: 5),
-                                                    Text(
-                                                      "Rs. ${snapshot.data?[snapshot.data.length - (index + 1)].unitPrice}",
-                                                      style: TextStyle(
-                                                          fontSize: 12,
-                                                          color: Colors.black
-                                                              .withOpacity(0.5),
-                                                          fontWeight:
-                                                              FontWeight.w400),
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                    IconButton(
-                                                      onPressed: () {
-                                                        showDialog<String>(
-                                                          context: context,
-                                                          builder: (BuildContext
-                                                                  context) =>
-                                                              AlertDialog(
-                                                            title: const Text(
-                                                                'Are you sure you want to delete?'),
-                                                            content: const Text(
-                                                                'Stock will be deleted permanently.'),
-                                                            actions: <Widget>[
-                                                              TextButton(
-                                                                onPressed: () =>
-                                                                    Navigator.pop(
-                                                                        context,
-                                                                        'Cancel'),
-                                                                child: const Text(
-                                                                    'Cancel'),
-                                                              ),
-                                                              TextButton(
-                                                                onPressed: () {
-                                                                  HttpConnectUser().deleteStock(snapshot
-                                                                      .data?[snapshot
-                                                                              .data
-                                                                              .length -
-                                                                          (index +
-                                                                              1)]
-                                                                      .stockId);
-                                                                  Navigator
-                                                                      .push(
-                                                                    context,
-                                                                    MaterialPageRoute(
-                                                                      builder:
-                                                                          (context) =>
-                                                                              HomeScreen(),
-                                                                    ),
-                                                                  );
-                                                                  // Navigator.pop(
-                                                                  //     context, 'OK');
-                                                                  // child:
-                                                                },
-                                                                child:
-                                                                    const Text(
-                                                                        'OK'),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        );
-                                                      },
-                                                      icon: Icon(
-                                                        Icons.delete_outline,
-                                                        color: Colors.red,
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 5),
-                                                    Text(
-                                                      "${snapshot.data?[snapshot.data.length - (index + 1)].supplierName}",
-                                                      style: TextStyle(
-                                                          fontSize: 12,
-                                                          color: Colors.black
-                                                              .withOpacity(0.5),
-                                                          fontWeight:
-                                                              FontWeight.w400),
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                    SizedBox(height: 5),
-                                                    Text(
-                                                      "${Jiffy(snapshot.data?[snapshot.data.length - (index + 1)].createdAt).yMMMMEEEEd}",
-                                                      style: TextStyle(
-                                                          fontSize: 12,
-                                                          color: Colors.black
-                                                              .withOpacity(0.5),
-                                                          fontWeight:
-                                                              FontWeight.w400),
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                  ],
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          width: (MediaQuery.of(context)
-                                                      .size
-                                                      .width -
-                                                  0) /
-                                              2.82,
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
-                                            children: [
-                                              Text(
-                                                "Rs. ${double.parse(snapshot.data?[snapshot.data.length - (index + 1)].quantity) * double.parse(snapshot.data?[snapshot.data.length - (index + 1)].unitPrice)}",
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 15,
-                                                  color: Color.fromARGB(
-                                                      255, 33, 139, 36),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            )
-                          ],
+                    tooltipBehavior: _tooltipBehavior,
+                    series: <CircularSeries>[
+                      RadialBarSeries<RadialBarModel, String>(
+                        dataSource: radialBarData,
+                        xValueMapper: (RadialBarModel data, _) => data.category,
+                        yValueMapper: (RadialBarModel data, _) => data.quantity,
+                        dataLabelSettings: DataLabelSettings(isVisible: true),
+                        enableTooltip: true,
+                      )
+                    ],
+                  ),
+            Padding(
+              padding: const EdgeInsets.only(left: 15, right: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      "Recently Added Stocks",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        color: Color.fromARGB(255, 95, 95, 95),
+                      ),
+                    ),
+                  ),
+                  // Icon(Icons.search)
+                ],
+              ),
+            ),
+            Expanded(
+              child: FutureBuilder(
+                future: fetchdata(),
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (snapshot.data == null) {
+                    return SpinKitWave(
+                      color: Colors.black54,
+                    );
+                  } else {
+                    if (snapshot.data?.length == 0) {
+                      return Container(
+                        child: Center(
+                          child: Text(
+                            "No Stocks To Show",
+                            style: GoogleFonts.poppins(
+                                fontSize: 23,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black54),
+                          ),
                         ),
                       );
-                    },
-                  );
-                }
-              }
-            },
-          ),
-        )
-      ],
+                    } else {
+                      final List<StockModel> stockData = List.generate(
+                        snapshot.data.length,
+                        (index) => StockModel(
+                          '${snapshot.data?[index].stockName}',
+                          '${snapshot.data?[index].quantity}',
+                          '${snapshot.data?[index].unitPrice}',
+                          '${snapshot.data?[index].category}',
+                          '${snapshot.data?[index].supplierName}',
+                          '${snapshot.data?[index].stockId}',
+                        ),
+                      );
+                      return ListView.builder(
+                        itemCount: stockData.length,
+                        itemBuilder: (context, index) {
+                          return Card(
+                            child: Row(
+                              children: [
+                                InkWell(
+                                  onTap: () {},
+                                  onLongPress: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => EditStock(
+                                            index:
+                                                stockData.length - (index + 1),
+                                            stocks: stockData),
+                                      ),
+                                    );
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 10),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Container(
+                                              width: (MediaQuery.of(context)
+                                                          .size
+                                                          .width -
+                                                      60) *
+                                                  0.65,
+                                              child: Row(
+                                                children: [
+                                                  Container(
+                                                    width: 50,
+                                                    height: 50,
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      color: Colors.grey
+                                                          .withOpacity(0.1),
+                                                    ),
+                                                    child: Center(
+                                                      child: Image.asset(
+                                                        "assets/images/${snapshot.data?[snapshot.data.length - (index + 1)].category.toLowerCase()}.png",
+                                                        width: 50,
+                                                        height: 50,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: 15),
+                                                  Container(
+                                                    width:
+                                                        (MediaQuery.of(context)
+                                                                    .size
+                                                                    .width -
+                                                                110) *
+                                                            0.5,
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          "${snapshot.data?[snapshot.data.length - (index + 1)].stockName} x ${snapshot.data?[snapshot.data.length - (index + 1)].quantity}",
+                                                          style: TextStyle(
+                                                              fontSize: 15,
+                                                              color:
+                                                                  Colors.black,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500),
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        ),
+                                                        SizedBox(height: 5),
+                                                        Text(
+                                                          "Rs. ${snapshot.data?[snapshot.data.length - (index + 1)].unitPrice}",
+                                                          style: TextStyle(
+                                                              fontSize: 12,
+                                                              color: Colors
+                                                                  .black
+                                                                  .withOpacity(
+                                                                      0.5),
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w400),
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        ),
+                                                        IconButton(
+                                                          onPressed: () {
+                                                            showDialog<String>(
+                                                              context: context,
+                                                              builder: (BuildContext
+                                                                      context) =>
+                                                                  AlertDialog(
+                                                                title: const Text(
+                                                                    'Are you sure you want to delete?'),
+                                                                content: const Text(
+                                                                    'Stock will be deleted permanently.'),
+                                                                actions: <
+                                                                    Widget>[
+                                                                  TextButton(
+                                                                    onPressed: () =>
+                                                                        Navigator.pop(
+                                                                            context,
+                                                                            'Cancel'),
+                                                                    child: const Text(
+                                                                        'Cancel'),
+                                                                  ),
+                                                                  TextButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      HttpConnectUser().deleteStock(snapshot
+                                                                          .data?[snapshot.data.length -
+                                                                              (index + 1)]
+                                                                          .stockId);
+                                                                      Navigator
+                                                                          .push(
+                                                                        context,
+                                                                        MaterialPageRoute(
+                                                                          builder: (context) =>
+                                                                              HomeScreen(),
+                                                                        ),
+                                                                      );
+                                                                      // Navigator.pop(
+                                                                      //     context, 'OK');
+                                                                      // child:
+                                                                    },
+                                                                    child:
+                                                                        const Text(
+                                                                            'OK'),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            );
+                                                          },
+                                                          icon: Icon(
+                                                            Icons
+                                                                .delete_outline,
+                                                            color: Colors.red,
+                                                          ),
+                                                        ),
+                                                        SizedBox(height: 5),
+                                                        Text(
+                                                          "${snapshot.data?[snapshot.data.length - (index + 1)].supplierName}",
+                                                          style: TextStyle(
+                                                              fontSize: 12,
+                                                              color: Colors
+                                                                  .black
+                                                                  .withOpacity(
+                                                                      0.5),
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w400),
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        ),
+                                                        SizedBox(height: 5),
+                                                        Text(
+                                                          "${Jiffy(snapshot.data?[snapshot.data.length - (index + 1)].createdAt).yMMMMEEEEd}",
+                                                          style: TextStyle(
+                                                              fontSize: 12,
+                                                              color: Colors
+                                                                  .black
+                                                                  .withOpacity(
+                                                                      0.5),
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w400),
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                            Container(
+                                              width: (MediaQuery.of(context)
+                                                          .size
+                                                          .width -
+                                                      0) /
+                                                  2.82,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  Text(
+                                                    "Rs. ${double.parse(snapshot.data?[snapshot.data.length - (index + 1)].quantity) * double.parse(snapshot.data?[snapshot.data.length - (index + 1)].unitPrice)}",
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontSize: 15,
+                                                      color: Color.fromARGB(
+                                                          255, 33, 139, 36),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    }
+                  }
+                },
+              ),
+            )
+          ],
+        ),
+      ),
     );
   }
 }
@@ -486,4 +564,15 @@ class StockModel {
 
   StockModel(this.stockName, this.quantity, this.unitPrice, this.category,
       this.supplierName, this.stockId);
+}
+
+//  Radial Bar  Model
+class RadialBarModel {
+  final int quantity;
+  final String category;
+
+  RadialBarModel(
+    this.quantity,
+    this.category,
+  );
 }
