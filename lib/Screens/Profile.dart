@@ -1,12 +1,17 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:xpense_android/Screens/AddDocuments.dart';
 import 'package:xpense_android/Screens/EditProfile.dart';
-import 'package:xpense_android/Screens/LoginScreen.dart';
+import 'package:xpense_android/Screens/HomeScreen.dart';
 import 'package:xpense_android/http/HttpUser.dart';
 import 'package:xpense_android/response/GetProfileResponse.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:dio/dio.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 
 class Profile extends StatefulWidget {
   const Profile({Key? key}) : super(key: key);
@@ -59,8 +64,8 @@ class _ProfileState extends State<Profile> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+    fetchUserDocuments();
     fetchdata();
   }
 
@@ -77,6 +82,11 @@ class _ProfileState extends State<Profile> {
       print(err);
     }
     return Future.value(true);
+  }
+
+  fetchUserDocuments() async {
+    var documentResponse = await currentUser.fetchDocuments();
+    return documentResponse;
   }
 
   @override
@@ -177,26 +187,202 @@ class _ProfileState extends State<Profile> {
                 cards("ADDRESS", "${responseCatcher.data?.address}"),
                 cards("JOIN DATE",
                     "${Jiffy(responseCatcher.data?.createdAt).yMMMMEEEEd}"),
+
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 5.0,
+                    horizontal: 14,
+                  ),
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      "Your Documents",
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                FutureBuilder(
+                  future: fetchUserDocuments(),
+                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                    // print(date);
+                    if (snapshot.data == null) {
+                      return SpinKitWave(
+                        color: Theme.of(context).highlightColor,
+                      );
+                    } else {
+                      if (snapshot.data?.length == 0) {
+                        return Container(
+                          child: Center(
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 18.0),
+                              child: Text(
+                                "No Documents Added",
+                                style: GoogleFonts.poppins(
+                                    fontSize: 23,
+                                    fontWeight: FontWeight.w500,
+                                    color: Theme.of(context).highlightColor),
+                              ),
+                            ),
+                          ),
+                        );
+                      } else {
+                        // print(snapshot.data.length);
+                        return GridView.builder(
+                          shrinkWrap: true,
+                          primary: false,
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 0,
+                            mainAxisSpacing: 10,
+                          ),
+                          itemBuilder: (context, index) {
+                            return Column(
+                              children: [
+                                Container(
+                                  width: MediaQuery.of(context).size.width / 3,
+                                  height: MediaQuery.of(context).size.width / 3,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        width: 1, color: Colors.white),
+                                    // shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                      fit: BoxFit.cover,
+                                      image: NetworkImage(
+                                        "http://192.168.1.66:3000/uploads/photo_${snapshot.data?[snapshot.data.length - (index + 1)]['userId']}_${snapshot.data?[snapshot.data.length - (index + 1)]['picture']}",
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                FittedBox(
+                                  child: Text(
+                                    "${snapshot.data?[index]["picture"].split("_").last.split(".").first.split("r").last}",
+                                    maxLines: 1,
+                                    style: GoogleFonts.poppins(
+                                      textStyle: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Wrap(
+                                  spacing: 30,
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        _save(
+                                            "http://192.168.1.65:3000/uploads/photo_${snapshot.data?[snapshot.data.length - (index + 1)]['userId']}_${snapshot.data?[snapshot.data.length - (index + 1)]['picture']}");
+                                      },
+                                      child: Icon(
+                                        Icons.download_rounded,
+                                        color: Colors.green,
+                                      ),
+                                    ),
+                                    InkWell(
+                                      onTap: () {
+                                        showDialog<String>(
+                                          context: context,
+                                          builder: (BuildContext context) =>
+                                              AlertDialog(
+                                            title: const Text(
+                                                'Are you sure you want to delete?'),
+                                            content: const Text(
+                                                'Document will be deleted permanently.'),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(
+                                                    context, 'Cancel'),
+                                                child: const Text('Cancel'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  print(snapshot.data?[
+                                                      snapshot.data.length -
+                                                          (index + 1)]["_id"]);
+                                                  HttpConnectUser()
+                                                      .deleteDocument(
+                                                    snapshot.data?[
+                                                        snapshot.data.length -
+                                                            (index + 1)]["_id"],
+                                                  );
+                                                  Navigator.pop(context, 'OK');
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          HomeScreen(),
+                                                    ),
+                                                  );
+                                                },
+                                                child: const Text('OK'),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                      child: Icon(
+                                        Icons.delete_forever_rounded,
+                                        color: Colors.orange,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              ],
+                            );
+                          },
+                          itemCount: snapshot.data.length,
+                        );
+                      }
+                    }
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                    bottom: 18.0,
+                    right: 18,
+                    left: 18,
+                    top: 10,
+                  ),
                   child: SizedBox(
                     width: double.infinity,
+                    height: 40,
                     child: ElevatedButton(
-                      onPressed: () async {},
+                      onPressed: () async {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AddDocuments(),
+                            ));
+                      },
                       child: Text(
                         "ADD DOCUMENTS",
                         style: GoogleFonts.poppins(
-                            color: Colors.white, fontSize: 20),
+                          color: Colors.white,
+                          fontSize: 20,
+                        ),
                       ),
                       style: ElevatedButton.styleFrom(
                         primary: Color(0xff3099EC),
                         shadowColor: Color(0xff3099EC),
                         elevation: 5,
                         shape: new RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(30),
+                          borderRadius: new BorderRadius.circular(10),
                         ),
                         textStyle: TextStyle(
-                            fontSize: 30, fontWeight: FontWeight.bold),
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -208,5 +394,29 @@ class _ProfileState extends State<Profile> {
         ),
       );
     }
+  }
+
+  _save(String url) async {
+    var status = await Permission.storage.request();
+    var response = await Dio().get(
+      url,
+      options: Options(responseType: ResponseType.bytes),
+    );
+    final result = await ImageGallerySaver.saveImage(
+      Uint8List.fromList(response.data),
+      quality: 100,
+      name: url.split("_").last,
+    );
+    if (result["isSuccess"] == true) {
+      Fluttertoast.showToast(
+        msg: "Image saved to gallery.",
+      );
+    } else {
+      Fluttertoast.showToast(
+        msg: "Failed to download.",
+        textColor: Colors.red,
+      );
+    }
+    print(result["isSuccess"]);
   }
 }

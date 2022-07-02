@@ -728,4 +728,78 @@ class HttpConnectUser {
       throw Exception();
     }
   }
+
+  // +++++++++++++++++++++++++++++++++   ADD DOCUMENTS (MULTIPLE FILE UPLOAD)     +++++++++++++++++++++++++++++++++++
+
+  addDocuments(List<File> files) async {
+    List<File> pickedFile = files;
+
+    print(pickedFile[0]);
+
+    String tok = 'Bearer $token';
+
+    // create multipart request
+    var request =
+        http.MultipartRequest('POST', Uri.parse(baseurl + "auth/addDocuments"));
+
+    request.headers.addAll({
+      'Authorization': tok,
+    });
+
+    if (pickedFile.length > 0) {
+      for (var i = 0; i < pickedFile.length; i++) {
+        request.files.add(
+          http.MultipartFile(
+              'picture',
+              File(pickedFile[i].path).readAsBytes().asStream(),
+              File(pickedFile[i].path).lengthSync(),
+              filename: pickedFile[i].path.split("/").last),
+        );
+      }
+
+      // send
+      var response = await request.send();
+
+      // listen for response
+      response.stream.transform(utf8.decoder).listen((value) {
+        debugPrint(value);
+        //  _submitedSuccessfully(context);
+      });
+    }
+  }
+
+  // +++++++++++++++++++++++++++++++++   FETCH ALL USER DOCUMENTS    +++++++++++++++++++++++++++++++++++
+
+  fetchDocuments() async {
+    String tok = 'Bearer $token';
+    try {
+      var documents =
+          await http.get(Uri.parse(baseurl + "auth/fetchDocuments"), headers: {
+        'Authorization': tok,
+      });
+      // print(jsonDecode(documents.body)["data"]);
+      return jsonDecode(documents.body)["data"];
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  // +++++++++++++++++++++++++++++++ DELETE DOCUMENT +++++++++++++++++++++++++++++++++++++++++++++
+
+  void deleteDocument(String documentId) async {
+    print(documentId);
+    String tok = 'Bearer $token';
+
+    final response = await http.delete(
+        Uri.parse(baseurl + 'auth/deleteDocument/${documentId}'),
+        headers: {'Authorization': tok});
+    if (response.statusCode == 200) {
+      Fluttertoast.showToast(
+        msg: "Document Deleted",
+        backgroundColor: Colors.green,
+        fontSize: 16,
+        gravity: ToastGravity.TOP,
+      );
+    } else {}
+  }
 }
