@@ -728,4 +728,72 @@ class HttpConnectUser {
       throw Exception();
     }
   }
+  // ++++++++++++++++++++++++++++++++ SENDING OTP EMAIL TO THE REGISTERED USER EMAIL ++++++++++++++++++++++++++++++++++++++++
+
+  Future verifyOTPEmail(String url, String userId, String otp) async {
+    if (otp.length <= 0) {
+      Fluttertoast.showToast(
+        msg: "Please enter OTP",
+        backgroundColor: Colors.red,
+        gravity: ToastGravity.TOP,
+        fontSize: 16,
+      );
+    } else {
+      // print(date);
+      String fullUrl = baseurl + url + userId + "/" + otp;
+      print(fullUrl);
+      String tok = 'Bearer $token';
+      var response = await http.post(Uri.parse(fullUrl), headers: {
+        'Authorization': tok,
+      });
+      if (jsonDecode(response.body)["status"] == "VERIFIED") {
+        print(response.body);
+        return json.decode(response.body)["status"];
+      } else {
+        Fluttertoast.showToast(
+          msg: jsonDecode(response.body)["message"],
+          backgroundColor: Colors.red,
+          gravity: ToastGravity.TOP,
+          fontSize: 16,
+        );
+      }
+    }
+  }
+  // ++++++++++++++++++++++++++++++++ FETCHING USER ID WITH USER EMAIL ++++++++++++++++++++++++++++++++++++++++
+
+  Future getUserId(String url, String email) async {
+    print("Get User ID Function");
+    print(email);
+    String fullUrl = baseurl + url + email;
+    print(fullUrl);
+    String tok = 'Bearer $token';
+    var response = await http.get(Uri.parse(fullUrl), headers: {
+      'Authorization': tok,
+    });
+    if (response.statusCode == 200) {
+      // print(response.body);
+      return json.decode(response.body)["data"];
+    } else {
+      throw Exception('Failed To Fetch User ID');
+    }
+  }
+
+  // ++++++++++++++++++++++++++++++++ RESENDING OTP EMAIL TO THE REGISTERED USER EMAIL ++++++++++++++++++++++++++++++++++++++++
+
+  Future resendOTP(String url, String userId, String email) async {
+    print("Reset OTP Function");
+    print(email + "//" + email);
+    String fullUrl = baseurl + url + userId + "/" + email;
+    print(fullUrl);
+    String tok = 'Bearer $token';
+    var response = await http.post(Uri.parse(fullUrl), headers: {
+      'Authorization': tok,
+    });
+    if (response.statusCode == 200) {
+      // print(response.body);
+      return json.decode(response.body)["data"];
+    } else {
+      throw Exception('Failed To Send OTP');
+    }
+  }
 }
