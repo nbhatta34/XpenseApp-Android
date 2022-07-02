@@ -728,4 +728,63 @@ class HttpConnectUser {
       throw Exception();
     }
   }
+  // +++++++++++++++++++++++++++++++++        COMPARE PASSWORD    +++++++++++++++++++++++++++++++++++
+
+  comparePassword(String password) async {
+    Map<String, dynamic> compare = {'password': password};
+
+    String tok = 'Bearer $token';
+
+    try {
+      final response = await http.post(
+        Uri.parse(
+          baseurl + "auth/comparePassword",
+        ),
+        headers: {
+          'Authorization': tok,
+        },
+        body: compare,
+      );
+
+      if (response.body == true) {
+        return json.decode(response.body);
+      } else {
+        return response.body;
+      }
+    } catch (e) {
+      print(e);
+    }
+    return false;
+  }
+
+  // +++++++++++++++++++++++++++++++++   CHANGE PASSWORD     +++++++++++++++++++++++++++++++++++
+
+  changePassword(String password) async {
+    Map<String, dynamic> change = {'password': password};
+
+    String tok = 'Bearer $token';
+
+    try {
+      final response = await http.post(
+        Uri.parse(
+          baseurl + "auth/changePassword",
+        ),
+        headers: {
+          'Authorization': tok,
+        },
+        body: change,
+      );
+
+      // print(response.body);
+
+      if (response.body == true) {
+        return response.body;
+      } else {
+        return response.body;
+      }
+    } catch (e) {
+      print(e);
+    }
+    return false;
+  }
 }
