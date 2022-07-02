@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:xpense_android/Screens/LoginScreen.dart';
+import 'package:xpense_android/widgets/DarkThemetoggle.dart';
 
 class Settings extends StatefulWidget {
   const Settings({Key? key}) : super(key: key);
@@ -18,33 +19,46 @@ class _SettingsState extends State<Settings> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => LoginScreen(),
-                          ));
-                    },
-                    child: Text(
-                      "Logout",
-                      style: GoogleFonts.poppins(
-                          color: Colors.white, fontSize: 20),
+              InkWell(
+                onTap: () {},
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 10.0, horizontal: 18),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 3, horizontal: 24),
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                      color: Color.fromARGB(255, 112, 52, 224),
+                      borderRadius: BorderRadius.circular(30),
                     ),
-                    style: ElevatedButton.styleFrom(
-                      primary: Color(0xff3099EC),
-                      shadowColor: Color(0xff3099EC),
-                      elevation: 5,
-                      shape: new RoundedRectangleBorder(
-                        borderRadius: new BorderRadius.circular(30),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.dark_mode_outlined,
+                                color: Colors.white,
+                                size: 30,
+                              ),
+                              SizedBox(
+                                width: 20,
+                              ),
+                              Text(
+                                "Dark Mode",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 19,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                          DarkThemeToggle()
+                        ],
                       ),
-                      textStyle:
-                          TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
