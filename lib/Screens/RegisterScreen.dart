@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:xpense_android/Screens/OTPVerify.dart';
 import 'package:xpense_android/http/HttpUser.dart';
 import 'package:xpense_android/model/UserModel.dart';
 
@@ -16,11 +17,15 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  bool _sendingOTP = false;
+
   String email = "";
   String fname = "";
   String lname = "";
   String password = "";
   String confPassword = "";
+
+  TextEditingController _emailController = new TextEditingController();
 
   Future<bool> registerUser(User u) {
     var res = HttpConnectUser().registerPost(u);
@@ -29,54 +34,59 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // final iconButton = IconButton(
-    //   splashColor: Colors.transparent,
-    //   onPressed: () {
-    //     Navigator.push(
-    //       context,
-    //       MaterialPageRoute(
-    //         builder: (context) => LoginScreen(),
-    //       ),
-    //     );
-    //   },
-    //   icon: Icon(
-    //     Icons.arrow_back_rounded,
-    //     color: Colors.orangeAccent,
-    //     size: 35,
-    //   ),
-    // );
+    
 
     final signupButton = SizedBox(
       width: double.infinity,
       height: 50,
       child: ElevatedButton(
         onPressed: () async {
-          if (_formKey.currentState!.validate()) {
-            _formKey.currentState!.save();
-            print(fname + lname + email + password);
-            User u = User(
-                firstname: fname,
-                lastname: lname,
-                email: email,
-                password: password);
-            bool isCreated = await registerUser(u);
-            if (isCreated) {
-              
-              Fluttertoast.showToast(
-                msg: "Register Successful",
-                backgroundColor: Colors.greenAccent,
-                fontSize: 16,
-                gravity: ToastGravity.TOP,
-              );
-            } else {
-              Fluttertoast.showToast(
-                msg: "Failed To Create User",
-                backgroundColor: Colors.greenAccent,
-                fontSize: 16,
-                gravity: ToastGravity.TOP,
-              );
+          // sendOtp();
+          if (_emailController.text.length != 0) {
+            if (_formKey.currentState!.validate()) {
+              _formKey.currentState!.save();
+              setState(() {
+                _sendingOTP = true;
+              });
+              // print(fname + lname + email + password);
+              User u = User(
+                  firstname: fname,
+                  lastname: lname,
+                  email: email,
+                  password: password);
+              bool isCreated = await registerUser(u);
+
+              if (isCreated) {
+                setState(() {
+                  _sendingOTP = false;
+                });
+                
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Otp(email: _emailController.text),
+                    ));
+                Fluttertoast.showToast(
+                  msg:
+                      "Register Successful. OTP Verification Email Sent To ${_emailController.text}",
+                  backgroundColor: Colors.orange,
+                  fontSize: 16,
+                  gravity: ToastGravity.TOP,
+                );
+              } else {
+                setState(() {
+                  _sendingOTP = false;
+                });
+                Fluttertoast.showToast(
+                  msg: "Failed to create user",
+                  backgroundColor: Colors.red,
+                  fontSize: 16,
+                  gravity: ToastGravity.TOP,
+                );
+              }
             }
           }
+      
         },
         key: Key("register"),
         child: Text(
