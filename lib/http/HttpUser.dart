@@ -836,6 +836,24 @@ class HttpConnectUser {
       throw Exception('Failed To Fetch User ID');
     }
   }
+  // ++++++++++++++++++++++++++++++++ Get Selected Date Transaction Data ++++++++++++++++++++++++++++++++++++++++
+
+  Future viewSelectedDateTransactions(String url, DateTime date) async {
+    // print(date);
+    String selectedDate = "${date}";
+    String fullUrl = baseurl + url + selectedDate;
+    // print(fullUrl);
+    String tok = 'Bearer $token';
+    var response = await http.get(Uri.parse(fullUrl), headers: {
+      'Authorization': tok,
+    });
+    if (response.statusCode == 200) {
+      // print(response.body);
+      return json.decode(response.body)["data"];
+    } else {
+      throw Exception('Failed To Fetch User ID');
+    }
+  }
 
   // ++++++++++++++++++++++++++++++++ RESENDING OTP EMAIL TO THE REGISTERED USER EMAIL ++++++++++++++++++++++++++++++++++++++++
 
