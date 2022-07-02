@@ -22,6 +22,9 @@ class _DashBoardState extends State<DashBoard>
     with SingleTickerProviderStateMixin {
   HttpConnectUser transaction = HttpConnectUser();
   TransactionResponse responseCatcher = TransactionResponse();
+
+  DateTime date = DateTime.now();
+
   int activeDay = 3;
 
   bool isOpened = false;
@@ -171,6 +174,8 @@ class _DashBoardState extends State<DashBoard>
 
   // -----------------------------------------------------
 
+  // Fetching Transactions Data From Backend
+
   fetchdata() async {
     try {
       var response = await transaction.viewTransactions("auth/addTransaction/");
@@ -185,12 +190,45 @@ class _DashBoardState extends State<DashBoard>
             u["category"],
             u["clientName"],
             u["createdAt"],
-            u["_id"]);
+            u["_id"],
+            u["userId"]);
 
         transactions.add(trans);
       }
 
       return transactions;
+    } catch (err) {
+      print(err);
+    }
+  }
+
+  // ----------------------------------------------------------
+  // Fetching Transactions of Selected Date
+  fetchDataSelectedDate() async {
+    // print("Selected Date Function");
+    try {
+      var response = await transaction.viewSelectedDateTransactions(
+          "auth/getSelectedDateTransactions/", date);
+
+      List<TransactionOrigin> transactionsSelectedDate = [];
+
+      for (var u in response) {
+        TransactionOrigin trans = TransactionOrigin(
+            u["itemName"],
+            u["quantity"],
+            u["unitPrice"],
+            u["category"],
+            u["clientName"],
+            u["createdAt"],
+            u["_id"],
+            u["userId"]);
+
+        transactionsSelectedDate.add(trans);
+      }
+      // print("Data: ");
+      // print(transactionsSelectedDate);
+
+      return transactionsSelectedDate;
     } catch (err) {
       print(err);
     }
@@ -282,78 +320,70 @@ class _DashBoardState extends State<DashBoard>
     return Column(
       children: <Widget>[
         Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.01),
-                spreadRadius: 10,
-                blurRadius: 3,
-                // changes position of shadow
-              ),
-            ],
-          ),
-          child: Padding(
-            padding:
-                const EdgeInsets.only(top: 0, right: 20, left: 20, bottom: 25),
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 15,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "${date.year}/${date.month}/${date.day}",
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
                 ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: List.generate(
-                    7,
-                    (index) {
-                      return GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          width: (MediaQuery.of(context).size.width - 40) / 7,
-                          child: Column(
-                            children: [
-                              Text(
-                                "Sun",
-                                style: TextStyle(fontSize: 10),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Container(
-                                width: 30,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                  color: activeDay == index
-                                      ? Colors.pinkAccent
-                                      : Colors.transparent,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: activeDay == index
-                                        ? Colors.pinkAccent
-                                        : Colors.black.withOpacity(0.1),
-                                  ),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    "${index + 1}",
-                                    style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w600,
-                                        color: activeDay == index
-                                            ? Colors.white
-                                            : Colors.black),
-                                  ),
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: IconButton(
+                  onPressed: () async {
+                    DateTime? newDate = await showDatePicker(
+                      helpText: "SELECT A DATE TO DISPLAY TRANSACTIONS",
+                      context: context,
+                      initialDate: date,
+                      firstDate: DateTime(2022),
+                      lastDate: DateTime(2100),
+                    );
+
+                    // if 'cancel' null value will be returned
+                    if (newDate == null) {
+                      return;
+                    } else {
+                      // if 'ok' selected date will be returned
+
+                      setState(() {
+                        hi = true;
+                        date = newDate;
+                      });
+
+                      // fetchDataSelectedDate();
+                    }
+                  },
+                  color: Colors.blue,
+                  tooltip: "Select A Date To Display Transactions",
+                  icon: Icon(
+                    Icons.date_range_outlined,
                   ),
                 ),
-              ],
-            ),
+              ),
+              TextButton.icon(
+                onPressed: () {
+                  setState(() {
+                    hi = false;
+                    date = DateTime.now();
+                  });
+                },
+                icon: Icon(
+                  Icons.restart_alt_outlined,
+                  color: Colors.blue,
+                ),
+                label: Text(
+                  "Clear",
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.blue,
+                  ),
+                ),
+              )
+            ],
           ),
         ),
         Padding(
@@ -361,21 +391,12 @@ class _DashBoardState extends State<DashBoard>
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 15, right: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Current Month's Statistics",
-                      style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: Theme.of(context).canvasColor,
-                          fontWeight: FontWeight.w600),
-                    ),
-                    // Icon(Icons.search)
-                  ],
-                ),
+              Text(
+                "Current Month's Statistics",
+                style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    color: Theme.of(context).canvasColor,
+                    fontWeight: FontWeight.w600),
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 4.0),
@@ -510,123 +531,203 @@ class _DashBoardState extends State<DashBoard>
           ),
         ),
         Expanded(
-          child: FutureBuilder(
-            future: fetchdata(),
-            builder: (BuildContext context, AsyncSnapshot snapshot) {
-              if (snapshot.data == null) {
-                return SpinKitWave(
-                  color: Colors.black54,
-                );
-              } else {
-                if (snapshot.data?.length == 0) {
-                  return Container(
-                    child: Center(
-                      child: Text(
-                        "No Transactions To Show",
-                        style: GoogleFonts.poppins(
-                            fontSize: 23,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black54),
-                      ),
-                    ),
-                  );
-                } else {
-                  final List<Transactions> transactionData = List.generate(
-                    snapshot.data.length,
-                    (index) => Transactions(
-                      '${snapshot.data?[index].itemName}',
-                      '${snapshot.data?[index].quantity}',
-                      '${snapshot.data?[index].unitPrice}',
-                      '${snapshot.data?[index].category}',
-                      '${snapshot.data?[index].clientName}',
-                      '${snapshot.data?[index].transactionId}',
-                    ),
-                  );
-                  return ListView.builder(
-                    itemCount: transactionData.length,
-                    itemBuilder: (context, index) {
-                      return Card(
-                        child: Row(
-                          children: [
-                            InkWell(
-                              onTap: () {},
-                              onLongPress: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => EditTransaction(
-                                          index: transactionData.length -
-                                              (index + 1),
-                                          transactions: transactionData),
-                                    ));
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 8.0, horizontal: 10),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Container(
-                                          width: (MediaQuery.of(context)
-                                                      .size
-                                                      .width -
-                                                  60) *
-                                              0.65,
-                                          child: Row(
+          child: hi
+              ? FutureBuilder(
+                  future: fetchDataSelectedDate(),
+                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                    // print(date);
+                    if (snapshot.data == null) {
+                      return SpinKitWave(
+                        color: Theme.of(context).highlightColor,
+                      );
+                    } else {
+                      if (snapshot.data?.length == 0) {
+                        return Container(
+                          child: Center(
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 18.0),
+                              child: Text(
+                                "No Transactions On This Date",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 23,
+                                  fontWeight: FontWeight.w500,
+                                  color: Theme.of(context).highlightColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      } else {
+                        final List<Transactions> transactionData =
+                            List.generate(
+                          snapshot.data.length,
+                          (index) => Transactions(
+                            '${snapshot.data?[index].itemName}',
+                            '${snapshot.data?[index].quantity}',
+                            '${snapshot.data?[index].unitPrice}',
+                            '${snapshot.data?[index].category}',
+                            '${snapshot.data?[index].clientName}',
+                            '${snapshot.data?[index].transactionId}',
+                            '${snapshot.data?[index].userId}',
+                          ),
+                        );
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          primary: false,
+                          itemCount: transactionData.length,
+                          itemBuilder: (context, index) {
+                            return Card(
+                              child: Row(
+                                children: [
+                                  InkWell(
+                                    onTap: () {},
+                                    onLongPress: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                EditTransaction(
+                                                    index:
+                                                        transactionData.length -
+                                                            (index + 1),
+                                                    transactions:
+                                                        transactionData),
+                                          ));
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 8.0, horizontal: 10),
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
                                             children: [
-                                              Container(
-                                                width: 50,
-                                                height: 50,
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  color: Colors.grey
-                                                      .withOpacity(0.1),
-                                                ),
-                                                child: Center(
-                                                  child: Image.asset(
-                                                    "assets/images/${snapshot.data?[snapshot.data.length - (index + 1)].category.toLowerCase()}.png",
-                                                    width: 50,
-                                                    height: 50,
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(width: 15),
                                               Container(
                                                 width: (MediaQuery.of(context)
                                                             .size
                                                             .width -
-                                                        110) *
-                                                    0.5,
-                                                child: Column(
+                                                        60) *
+                                                    0.65,
+                                                child: Row(
+                                                  children: [
+                                                    Container(
+                                                      width: 50,
+                                                      height: 50,
+                                                      decoration: BoxDecoration(
+                                                        border: Border.all(
+                                                            width: 1,
+                                                            color:
+                                                                Colors.white),
+                                                        shape: BoxShape.circle,
+                                                        image: DecorationImage(
+                                                          fit: BoxFit.cover,
+                                                          image: NetworkImage(
+                                                              "http://10.0.2.2:3000/uploads/${snapshot.data?[snapshot.data.length - (index + 1)].category}_${snapshot.data?[snapshot.data.length - (index + 1)].userId}.png"),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 15),
+                                                    Container(
+                                                      width: (MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width -
+                                                              110) *
+                                                          0.5,
+                                                      child: Column(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            "${snapshot.data?[snapshot.data.length - (index + 1)].itemName} x ${snapshot.data?[snapshot.data.length - (index + 1)].quantity}",
+                                                            style: TextStyle(
+                                                                fontSize: 15,
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .primaryColorDark,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500),
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
+                                                          SizedBox(height: 5),
+                                                          Text(
+                                                            "Rs. ${snapshot.data?[snapshot.data.length - (index + 1)].unitPrice}",
+                                                            style: TextStyle(
+                                                                fontSize: 12,
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .highlightColor,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w400),
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
+                                                          SizedBox(height: 5),
+                                                          Text(
+                                                            "${snapshot.data?[snapshot.data.length - (index + 1)].clientName}",
+                                                            style: TextStyle(
+                                                                fontSize: 12,
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .highlightColor,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w400),
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
+                                                          SizedBox(height: 5),
+                                                          Text(
+                                                            "${Jiffy(snapshot.data?[snapshot.data.length - (index + 1)].createdAt).yMMMMEEEEd}",
+                                                            style: TextStyle(
+                                                                fontSize: 12,
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .highlightColor,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w400),
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                              Container(
+                                                width: (MediaQuery.of(context)
+                                                            .size
+                                                            .width -
+                                                        0) /
+                                                    2.82,
+                                                child: Row(
                                                   mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
+                                                      MainAxisAlignment.end,
                                                   children: [
                                                     Text(
-                                                      "${snapshot.data?[snapshot.data.length - (index + 1)].itemName} x ${snapshot.data?[snapshot.data.length - (index + 1)].quantity}",
+                                                      "Rs. ${double.parse(snapshot.data?[snapshot.data.length - (index + 1)].quantity) * double.parse(snapshot.data?[snapshot.data.length - (index + 1)].unitPrice)}",
                                                       style: TextStyle(
-                                                          fontSize: 15,
-                                                          color: Colors.black,
-                                                          fontWeight:
-                                                              FontWeight.w500),
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                    SizedBox(height: 5),
-                                                    Text(
-                                                      "Rs. ${snapshot.data?[snapshot.data.length - (index + 1)].unitPrice}",
-                                                      style: TextStyle(
-                                                          fontSize: 12,
-                                                          color: Colors.black
-                                                              .withOpacity(0.5),
-                                                          fontWeight:
-                                                              FontWeight.w400),
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        fontSize: 15,
+                                                        color: Color.fromARGB(
+                                                            255, 33, 139, 36),
+                                                      ),
                                                     ),
                                                     IconButton(
                                                       onPressed: () {
@@ -664,9 +765,6 @@ class _DashBoardState extends State<DashBoard>
                                                                             (context) =>
                                                                                 HomeScreen(),
                                                                       ));
-                                                                  // Navigator.pop(
-                                                                  //     context, 'OK');
-                                                                  // child:
                                                                 },
                                                                 child:
                                                                     const Text(
@@ -680,74 +778,306 @@ class _DashBoardState extends State<DashBoard>
                                                         Icons.delete_outline,
                                                         color: Colors.red,
                                                       ),
-                                                    ),
-                                                    SizedBox(height: 5),
-                                                    Text(
-                                                      "${snapshot.data?[snapshot.data.length - (index + 1)].clientName}",
-                                                      style: TextStyle(
-                                                          fontSize: 12,
-                                                          color: Colors.black
-                                                              .withOpacity(0.5),
-                                                          fontWeight:
-                                                              FontWeight.w400),
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                    SizedBox(height: 5),
-                                                    Text(
-                                                      "${Jiffy(snapshot.data?[snapshot.data.length - (index + 1)].createdAt).yMMMMEEEEd}",
-                                                      style: TextStyle(
-                                                          fontSize: 12,
-                                                          color: Colors.black
-                                                              .withOpacity(0.5),
-                                                          fontWeight:
-                                                              FontWeight.w400),
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
+                                                    )
                                                   ],
                                                 ),
                                               )
                                             ],
                                           ),
-                                        ),
-                                        Container(
-                                          width: (MediaQuery.of(context)
-                                                      .size
-                                                      .width -
-                                                  0) /
-                                              2.82,
-                                          child: Row(
+                                        ],
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      }
+                    }
+                  },
+                )
+              : FutureBuilder(
+                  future: fetchdata(),
+                  builder: (BuildContext context, AsyncSnapshot snapshot) {
+                    if (snapshot.data == null) {
+                      return SpinKitWave(
+                        color: Theme.of(context).highlightColor,
+                      );
+                    } else {
+                      if (snapshot.data?.length == 0) {
+                        return Container(
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 18.0),
+                                  child: Text(
+                                    "No Transactions To Show",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 23,
+                                      fontWeight: FontWeight.w500,
+                                      color: Theme.of(context).highlightColor,
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 18.0),
+                                  child: Text(
+                                    "Please Add Some Transactions To See Them Here.",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      } else {
+                        final List<Transactions> transactionData =
+                            List.generate(
+                          snapshot.data.length,
+                          (index) => Transactions(
+                            '${snapshot.data?[index].itemName}',
+                            '${snapshot.data?[index].quantity}',
+                            '${snapshot.data?[index].unitPrice}',
+                            '${snapshot.data?[index].category}',
+                            '${snapshot.data?[index].clientName}',
+                            '${snapshot.data?[index].transactionId}',
+                            '${snapshot.data?[index].userId}',
+                          ),
+                        );
+                        return ListView.builder(
+                          primary: false,
+                          shrinkWrap: true,
+                          itemCount: transactionData.length,
+                          itemBuilder: (context, index) {
+                            return Card(
+                              child: Row(
+                                children: [
+                                  InkWell(
+                                    onTap: () {},
+                                    onLongPress: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                EditTransaction(
+                                                    index:
+                                                        transactionData.length -
+                                                            (index + 1),
+                                                    transactions:
+                                                        transactionData),
+                                          ));
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 8.0, horizontal: 10),
+                                      child: Column(
+                                        children: [
+                                          Row(
                                             mainAxisAlignment:
-                                                MainAxisAlignment.end,
+                                                MainAxisAlignment.spaceBetween,
                                             children: [
-                                              Text(
-                                                "Rs. ${double.parse(snapshot.data?[snapshot.data.length - (index + 1)].quantity) * double.parse(snapshot.data?[snapshot.data.length - (index + 1)].unitPrice)}",
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 15,
-                                                  color: Color.fromARGB(
-                                                      255, 33, 139, 36),
+                                              Container(
+                                                width: (MediaQuery.of(context)
+                                                            .size
+                                                            .width -
+                                                        60) *
+                                                    0.65,
+                                                child: Row(
+                                                  children: [
+                                                    Container(
+                                                      width: 50,
+                                                      height: 50,
+                                                      decoration: BoxDecoration(
+                                                        border: Border.all(
+                                                            width: 1,
+                                                            color:
+                                                                Colors.white),
+                                                        shape: BoxShape.circle,
+                                                        image: DecorationImage(
+                                                          fit: BoxFit.cover,
+                                                          image: NetworkImage(
+                                                              "http://10.0.2.2:3000/uploads/${snapshot.data?[snapshot.data.length - (index + 1)].category}_${snapshot.data?[snapshot.data.length - (index + 1)].userId}.png"),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    SizedBox(width: 15),
+                                                    Container(
+                                                      width: (MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width -
+                                                              110) *
+                                                          0.5,
+                                                      child: Column(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            "${snapshot.data?[snapshot.data.length - (index + 1)].itemName} x ${snapshot.data?[snapshot.data.length - (index + 1)].quantity}",
+                                                            style: TextStyle(
+                                                                fontSize: 15,
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .primaryColorDark,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500),
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
+                                                          SizedBox(height: 5),
+                                                          Text(
+                                                            "Rs. ${snapshot.data?[snapshot.data.length - (index + 1)].unitPrice}",
+                                                            style: TextStyle(
+                                                                fontSize: 12,
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .highlightColor,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w400),
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
+                                                          SizedBox(height: 5),
+                                                          Text(
+                                                            "${snapshot.data?[snapshot.data.length - (index + 1)].clientName}",
+                                                            style: TextStyle(
+                                                                fontSize: 12,
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .highlightColor,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w400),
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
+                                                          SizedBox(height: 5),
+                                                          Text(
+                                                            "${Jiffy(snapshot.data?[snapshot.data.length - (index + 1)].createdAt).yMMMMEEEEd}",
+                                                            style: TextStyle(
+                                                                fontSize: 12,
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .highlightColor,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w400),
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    )
+                                                  ],
                                                 ),
                                               ),
+                                              Container(
+                                                width: (MediaQuery.of(context)
+                                                            .size
+                                                            .width -
+                                                        0) /
+                                                    2.82,
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.end,
+                                                  children: [
+                                                    Text(
+                                                      "Rs. ${double.parse(snapshot.data?[snapshot.data.length - (index + 1)].quantity) * double.parse(snapshot.data?[snapshot.data.length - (index + 1)].unitPrice)}",
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        fontSize: 15,
+                                                        color: Color.fromARGB(
+                                                            255, 33, 139, 36),
+                                                      ),
+                                                    ),
+                                                    IconButton(
+                                                      onPressed: () {
+                                                        showDialog<String>(
+                                                          context: context,
+                                                          builder: (BuildContext
+                                                                  context) =>
+                                                              AlertDialog(
+                                                            title: const Text(
+                                                                'Are you sure you want to delete?'),
+                                                            content: const Text(
+                                                                'Transaction will be deleted permanently.'),
+                                                            actions: <Widget>[
+                                                              TextButton(
+                                                                onPressed: () =>
+                                                                    Navigator.pop(
+                                                                        context,
+                                                                        'Cancel'),
+                                                                child: const Text(
+                                                                    'Cancel'),
+                                                              ),
+                                                              TextButton(
+                                                                onPressed: () {
+                                                                  HttpConnectUser().deleteTransaction(snapshot
+                                                                      .data?[snapshot
+                                                                              .data
+                                                                              .length -
+                                                                          (index +
+                                                                              1)]
+                                                                      .transactionId);
+                                                                  Navigator.push(
+                                                                      context,
+                                                                      MaterialPageRoute(
+                                                                        builder:
+                                                                            (context) =>
+                                                                                HomeScreen(),
+                                                                      ));
+                                                                },
+                                                                child:
+                                                                    const Text(
+                                                                        'OK'),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        );
+                                                      },
+                                                      icon: Icon(
+                                                        Icons.delete_outline,
+                                                        color: Colors.red,
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                              )
                                             ],
                                           ),
-                                        )
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                  ],
-                                ),
+                                  )
+                                ],
                               ),
-                            )
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                }
-              }
-            },
-          ),
+                            );
+                          },
+                        );
+                      }
+                    }
+                  },
+                ),
         )
       ],
     );
@@ -762,9 +1092,18 @@ class TransactionOrigin {
   final String clientName;
   final String createdAt;
   final String transactionId;
+  final String userId;
 
-  TransactionOrigin(this.itemName, this.quantity, this.unitPrice, this.category,
-      this.clientName, this.createdAt, this.transactionId);
+  TransactionOrigin(
+    this.itemName,
+    this.quantity,
+    this.unitPrice,
+    this.category,
+    this.clientName,
+    this.createdAt,
+    this.transactionId,
+    this.userId,
+  );
 }
 
 class Transactions {
@@ -773,10 +1112,18 @@ class Transactions {
       unitPrice,
       category,
       clientName,
-      transactionId;
+      transactionId,
+      userId;
 
-  Transactions(this.itemName, this.quantity, this.unitPrice, this.category,
-      this.clientName, this.transactionId);
+  Transactions(
+    this.itemName,
+    this.quantity,
+    this.unitPrice,
+    this.category,
+    this.clientName,
+    this.transactionId,
+    this.userId,
+  );
 }
 
 // Statistics Cards Model

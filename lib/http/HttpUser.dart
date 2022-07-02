@@ -728,4 +728,22 @@ class HttpConnectUser {
       throw Exception();
     }
   }
+  // ++++++++++++++++++++++++++++++++ Get Selected Date Transaction Data ++++++++++++++++++++++++++++++++++++++++
+
+  Future viewSelectedDateTransactions(String url, DateTime date) async {
+    // print(date);
+    String selectedDate = "${date}";
+    String fullUrl = baseurl + url + selectedDate;
+    // print(fullUrl);
+    String tok = 'Bearer $token';
+    var response = await http.get(Uri.parse(fullUrl), headers: {
+      'Authorization': tok,
+    });
+    if (response.statusCode == 200) {
+      // print(response.body);
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed To Load Transactions');
+    }
+  }
 }
